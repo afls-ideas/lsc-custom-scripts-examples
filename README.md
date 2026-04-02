@@ -119,8 +119,11 @@ Minimal starter template demonstrating the basic checklist script pattern. Use t
 git clone <repo-url>
 cd Custom_Scripts
 
-# Deploy to your org
+# Deploy LWC components to your org
 sf project deploy start --source-dir force-app
+
+# Register custom scripts (creates LifeScienceCustomScript records)
+sf data import tree --files data/LifeScienceCustomScripts.json --target-org <your-org>
 ```
 
 ### Deploy Individual Examples
@@ -135,21 +138,15 @@ sf project deploy start --source-dir force-app/main/default/lwc/visitActionValid
 
 ## Configuration in Admin Console
 
-After deploying the custom scripts:
+After deploying, register the scripts and assign them to workflow stages. See [ACTIVATION_GUIDE.md](ACTIVATION_GUIDE.md) for detailed instructions.
 
-1. Open **App Launcher** and navigate to **Admin Console**
-2. Go to **Workflow Configuration** → **Custom Scripts**
-3. Click **New** to create a new custom script
-4. Enter the LWC component name (e.g., `visitActionValidation`)
-5. Select the appropriate script type:
-   - Validation
-   - Checklist
-   - Visit Action Validation
-6. Click **Save**
-7. Navigate to **Workflow Configuration** → **Stage Objects**
-8. Edit the stage object where you want to apply the script
-9. Assign your validation/checklist scripts to the appropriate stages
-10. Click **Save**
+**Quick version:**
+
+1. Register scripts (if you didn't use the data import above):
+   - **Admin Console** → **Workflow Configuration** → **Custom Scripts** → **New** for each script
+2. Assign to stage objects:
+   - **Admin Console** → **Workflow Configuration** → **Stage Objects** → **Edit** → select scripts
+3. Ensure workflow paths are active
 
 **Note:** If you update the LWC code, click **Refresh** on the Custom Scripts page in Admin Console to reload the latest version.
 

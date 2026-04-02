@@ -10,23 +10,44 @@ After deploying the custom scripts to your org, follow these steps to activate a
 
 ## Step 1: Register Custom Scripts
 
-1. Open **App Launcher** and navigate to **Admin Console**
-2. Select **Workflow Configuration** > **Custom Scripts**
-3. Click **New** for each script and configure:
+### Option A: Automated (Recommended)
+
+Register all 7 scripts at once using one of these methods:
+
+**Using Salesforce CLI data import:**
+
+```bash
+sf data import tree --files data/LifeScienceCustomScripts.json --target-org <your-org>
+```
+
+**Using Anonymous Apex:**
+
+```bash
+sf apex run --file scripts/registerCustomScripts.apex --target-org <your-org>
+```
+
+Both methods create the following `LifeScienceCustomScript` records:
 
 | Script Name | Component Name | Type |
 |---|---|---|
-| Visit Action Validation | `visitActionValidation` | Visit Action Validation |
-| Inquiry Validation | `inquiryValidationScript` | Validation |
-| Compliance Validation | `complianceValidationScript` | Validation |
-| Visit Preparation Checklist | `visitPreparationChecklist` | Checklist |
-| Inquiry Escalation Checklist | `inquiryEscalationChecklist` | Checklist |
-| Simple Validation | `simpleValidationExample` | Validation |
-| Simple Checklist | `simpleChecklistExample` | Checklist |
+| DEMO Visit Action Validation | `visitActionValidation` | VisitActionValidation |
+| DEMO Inquiry Validation | `inquiryValidationScript` | Validation |
+| DEMO Compliance Validation | `complianceValidationScript` | Validation |
+| DEMO Visit Preparation Checklist | `visitPreparationChecklist` | Checklist |
+| DEMO Inquiry Escalation Checklist | `inquiryEscalationChecklist` | Checklist |
+| DEMO Simple Validation | `simpleValidationExample` | Validation |
+| DEMO Simple Checklist | `simpleChecklistExample` | Checklist |
 
+After importing, open **Admin Console** > **Workflow Configuration** > **Custom Scripts** and click **Refresh** to verify.
+
+### Option B: Manual
+
+1. Open **App Launcher** and navigate to **Admin Console**
+2. Select **Workflow Configuration** > **Custom Scripts**
+3. Click **New** for each script using the table above
 4. Click **Save** after each one
 
-> **Note:** If you redeploy updated LWC code, return to this page and click **Refresh** to reload the latest version.
+> **Note:** If you redeploy updated LWC code, return to Custom Scripts and click **Refresh** to reload the latest version.
 
 ## Step 2: Assign Scripts to Stage Objects
 

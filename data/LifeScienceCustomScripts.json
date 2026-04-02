@@ -1,0 +1,67 @@
+{
+    "records": [
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoVisitActionValidation"
+            },
+            "Name": "DEMO Visit Action Validation",
+            "ComponentName": "visitActionValidation",
+            "Type": "VisitActionValidation"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoInquiryValidation"
+            },
+            "Name": "DEMO Inquiry Validation",
+            "ComponentName": "inquiryValidationScript",
+            "Type": "Validation"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoComplianceValidation"
+            },
+            "Name": "DEMO Compliance Validation",
+            "ComponentName": "complianceValidationScript",
+            "Type": "Validation"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoVisitPreparationChecklist"
+            },
+            "Name": "DEMO Visit Preparation Checklist",
+            "ComponentName": "visitPreparationChecklist",
+            "Type": "Checklist"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoInquiryEscalationChecklist"
+            },
+            "Name": "DEMO Inquiry Escalation Checklist",
+            "ComponentName": "inquiryEscalationChecklist",
+            "Type": "Checklist"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoSimpleValidation"
+            },
+            "Name": "DEMO Simple Validation",
+            "ComponentName": "simpleValidationExample",
+            "Type": "Validation"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "DemoSimpleChecklist"
+            },
+            "Name": "DEMO Simple Checklist",
+            "ComponentName": "simpleChecklistExample",
+            "Type": "Checklist"
+        }
+    ]
+}
