@@ -79,16 +79,31 @@ This step applies to **Validation** and **Checklist** scripts only. Visit Action
 | ProviderVisit | `complianceValidationScript` | `visitPreparationChecklist` |
 | Any object (starter) | `simpleValidationExample` | `simpleChecklistExample` |
 
-## Step 3: Ensure a Workflow Path is Active
+## Step 3: Ensure Workflow Paths are Active
 
-Scripts only run when the object has an active workflow path. If you don't already have one:
+Custom scripts only run when the object has an active workflow path. Workflow paths are stored in the **`LifeSciStagePath`** object and are configured in the Admin Console.
+
+The following workflow paths are needed to test the example scripts:
+
+| Workflow Path Name | Object | Field API Name | Record Type |
+|---|---|---|---|
+| Inquiry | `Inquiry` | `Status` | Medical Inquiry |
+| Visit | `ProviderVisit` | `Status` | (default) |
+| Account | `Account` | `Status` | Person Account |
+
+> **Note:** If your org already has workflow paths for these objects, you can skip creating new ones. The scripts will run on any active workflow for the matching object.
+
+To create a workflow path:
 
 1. Go to **Workflow Configuration** > **Workflow Paths**
-2. Click **New**, name it, and select the object and record type
-3. Select the controlling picklist field (e.g., Status)
-4. Click **Continue** to open the workflow builder
-5. For each stage, add at least one **Stage Operation** with conditions and actions
-6. Click **Activate** to make the workflow path active
+2. Click **New** and enter the workflow path name from the table above
+3. Select the **Object** and **Record Type**
+4. Select the **Field API Name** as the controlling picklist field (this determines the stages)
+5. Click **Continue** to open the workflow builder
+6. For each stage, add at least one **Stage Operation** with conditions and actions
+7. Click **Activate** to make the workflow path active
+
+Once a workflow path is activated, the platform automatically creates `LifeSciStageObject` records for each object in the path. These stage objects are where validation and checklist scripts are assigned (Step 2).
 
 ## Testing Each Script Type
 
