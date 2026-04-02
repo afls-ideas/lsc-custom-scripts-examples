@@ -136,17 +136,20 @@ sf project deploy start --source-dir force-app/main/default/lwc/simpleValidation
 sf project deploy start --source-dir force-app/main/default/lwc/visitActionValidation
 ```
 
-## Configuration in Admin Console
+## Register Custom Scripts
 
-After deploying, register the scripts and assign them to workflow stages. See [ACTIVATION_GUIDE.md](ACTIVATION_GUIDE.md) for detailed instructions.
+After deploying the LWC components, you must register them as custom scripts. Registration creates records in the **`LifeScienceCustomScript`** object, which maps each LWC component to a script type so the platform knows when to execute it.
 
-**Quick version:**
+There are three ways to register:
 
-1. Register scripts (if you didn't use the data import above):
-   - **Admin Console** → **Workflow Configuration** → **Custom Scripts** → **New** for each script
-2. Assign to stage objects:
-   - **Admin Console** → **Workflow Configuration** → **Stage Objects** → **Edit** → select scripts
-3. Ensure workflow paths are active
+1. **CLI Data Import** (recommended) — `sf data import tree --files data/LifeScienceCustomScripts.json --target-org <your-org>`
+2. **Anonymous Apex** — `sf apex run --file scripts/registerCustomScripts.apex --target-org <your-org>`
+3. **Admin Console UI** — **App Launcher** → **Admin Console** → **Workflow Configuration** → **Custom Scripts** → **New** for each script
+
+After registering, assign validation and checklist scripts to stage objects:
+- **Admin Console** → **Workflow Configuration** → **Stage Objects** → **Edit** → select scripts
+
+See [ACTIVATION_GUIDE.md](ACTIVATION_GUIDE.md) for detailed step-by-step instructions and testing scenarios.
 
 **Note:** If you update the LWC code, click **Refresh** on the Custom Scripts page in Admin Console to reload the latest version.
 
