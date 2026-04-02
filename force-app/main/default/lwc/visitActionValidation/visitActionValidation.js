@@ -143,9 +143,8 @@
                     }
 
                     // Query Account to check IsPersonAccount field
-                    const { ConditionBuilder, FieldCondition } = await import('crm-data-util');
                     const entity = 'Account';
-                    const condition = new FieldCondition(entity, 'Id', 'EQ', accountId);
+                    const condition = new FieldCondition('Id', '=', accountId);
                     const fields = ['IsPersonAccount'];
 
                     const accounts = await _db.query(
@@ -218,9 +217,8 @@
                     }
 
                     // Query Account records for attendees
-                    const { ConditionBuilder, SetCondition } = await import('crm-data-util');
                     const entity = 'Account';
-                    const condition = new SetCondition(entity, 'Id', 'IN', attendeeAccountIds);
+                    const condition = new SetCondition('Id', 'IN', attendeeAccountIds);
                     const fields = ['Id', 'Name', 'IsPersonAccount'];
 
                     _childCallAccounts = await _db.query(
@@ -372,9 +370,8 @@
             }
 
             // Query UserAdditionalInfo to get ProfileIdentifier
-            const { ConditionBuilder, FieldCondition } = await import('crm-data-util');
             const entity = 'UserAdditionalInfo';
-            const condition = new FieldCondition(entity, 'UserId', 'EQ', userId);
+            const condition = new FieldCondition('UserId', '=', userId);
             const fields = ['ProfileIdentifier'];
 
             const userInfos = await db.query(
@@ -482,9 +479,8 @@
             }
 
             // Query ProductItem to get Product2Id
-            const { ConditionBuilder, SetCondition } = await import('crm-data-util');
             let entity = 'ProductItem';
-            let condition = new SetCondition(entity, 'Id', 'IN', productItemIds);
+            let condition = new SetCondition('Id', 'IN', productItemIds);
             let fields = ['Id', 'Product2Id'];
 
             const productItems = await db.query(
@@ -514,7 +510,7 @@
 
             // Query Product2 to get Names
             entity = 'Product2';
-            condition = new SetCondition(entity, 'Id', 'IN', product2Ids);
+            condition = new SetCondition('Id', 'IN', product2Ids);
             fields = ['Id', 'Name'];
 
             const products = await db.query(
