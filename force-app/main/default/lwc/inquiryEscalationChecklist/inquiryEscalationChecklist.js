@@ -1,201 +1,174 @@
 /**
  * Inquiry Escalation Checklist
  *
- * Custom script that validates whether a medical inquiry is ready for escalation.
- * Checks that responses are documented, priority is set, assigned to specialist,
- * and adverse event screening is complete.
+ * Checklist script that validates whether a medical inquiry is ready for escalation.
+ * Checks responses, priority, specialist assignment, and adverse event screening.
  *
- * Returns: Array of {title: string, status: "success"|"error"|"warning"}
- * - success: green check mark
- * - warning: yellow alert
- * - error: red X
+ * Type: Checklist | Shows on: Info icon for Record Update
+ *
+ * Key patterns demonstrated:
+ * - Counting records with responses
+ * - User profile queries via db.query
+ * - record.stringValue() for field access
+ *
+ * Available globals: record, user, db, env
+ * Available classes: ConditionBuilder, FieldCondition
  */
-import { LightningElement, api } from 'lwc';
-import { getDataService, parseContextData } from 'c/lscCustomScriptUtils';
+(() => {
+    const getRecordId = () => {
+        return record.stringValue("Id") || record.stringValue("uid");
+    };
 
-export default class InquiryEscalationChecklist extends LightningElement {
-    @api record;
+    async function checkResponseDocumented() {
+        try {
+            const recordId = getRecordId();
+            const entity = "InquiryQuestion";
+            const condition = new FieldCondition("InquiryId", "=", recordId);
 
-    @api
-    async execute() {
-        return (async () => {
-            const results = [];
-            const contextData = parseContextData(this.record);
+            const questions = await db.query(
+                entity,
+                await new ConditionBuilder(entity, condition).build(),
+                ["Id", "ResponseText"]
+            );
 
-            // Check 1: Response documented for all inquiry questions (async)
-            try {
-                const responseResult = await this.checkResponseDocumented();
-                results.push(responseResult);
-            } catch (error) {
-                results.push({
-                    title: `Error checking responses: ${error.message}`,
-                    status: 'error'
-                });
+            if (!questions || questions.length === 0) {
+                return {
+                    title: "No inquiry questions have been added",
+                    status: "error"
+                };
             }
 
-            // Check 2: Priority level set
-            try {
-                const priorityResult = this.checkPrioritySet();
-                results.push(priorityResult);
-            } catch (error) {
-                results.push({
-                    title: `Error checking priority: ${error.message}`,
-                    status: 'error'
-                });
+            let missingResponses = 0;
+            for (const question of questions) {
+                const responseText = question.stringValue("ResponseText");
+                if (!responseText || responseText.trim().length === 0) {
+                    missingResponses++;
+                }
             }
 
-            // Check 3: Assigned to medical specialist (async)
-            try {
-                const specialistResult = await this.checkAssignedToSpecialist();
-                results.push(specialistResult);
-            } catch (error) {
-                results.push({
-                    title: `Error checking specialist assignment: ${error.message}`,
-                    status: 'error'
-                });
+            if (missingResponses === 0) {
+                return {
+                    title: `All ${questions.length} inquiry questions have responses`,
+                    status: "success"
+                };
             }
 
-            // Check 4: Adverse event screening
-            try {
-                const adverseEventResult = this.checkAdverseEventScreening(contextData);
-                results.push(adverseEventResult);
-            } catch (error) {
-                results.push({
-                    title: `Error checking adverse event screening: ${error.message}`,
-                    status: 'error'
-                });
+            return {
+                title: `${missingResponses} of ${questions.length} questions still need responses`,
+                status: "warning"
+            };
+        } catch (error) {
+            env.log("Error checking responses: " + error.message);
+            return {
+                title: "Error checking responses",
+                status: "error"
+            };
+        }
+    }
+
+    function checkPrioritySet() {
+        try {
+            const priority = record.stringValue("Priority");
+
+            if (priority && priority.trim().length > 0) {
+                return {
+                    title: `Priority level set to ${priority}`,
+                    status: "success"
+                };
             }
 
-            return results;
-        })();
-    }
-
-    /**
-     * Check if all inquiry questions have responses documented
-     * @returns {Promise<Object>} Result object with title and status
-     */
-    async checkResponseDocumented() {
-        const dataService = getDataService();
-        const inquiryId = this.record.id;
-
-        const query = dataService.newQuery('InquiryQuestion');
-        const inquiryCondition = query.fields.stringField('InquiryId').eq(inquiryId);
-        query.where(inquiryCondition);
-
-        const results = await query.fetch();
-
-        if (results.totalSize === 0) {
             return {
-                title: 'No inquiry questions have been added',
-                status: 'error'
+                title: "Priority level has not been set",
+                status: "warning"
+            };
+        } catch (error) {
+            env.log("Error checking priority: " + error.message);
+            return {
+                title: "Error checking priority",
+                status: "error"
             };
         }
+    }
 
-        let missingResponses = 0;
-        for (const question of results.records) {
-            const responseText = question.stringValue('ResponseText');
-            if (!responseText || responseText.trim().length === 0) {
-                missingResponses++;
+    async function checkAssignedToSpecialist() {
+        try {
+            const ownerId = record.stringValue("OwnerId");
+
+            if (!ownerId) {
+                return {
+                    title: "No owner assigned",
+                    status: "warning"
+                };
             }
-        }
 
-        if (missingResponses === 0) {
+            const entity = "User";
+            const condition = new FieldCondition("Id", "=", ownerId);
+
+            const users = await db.query(
+                entity,
+                await new ConditionBuilder(entity, condition).build(),
+                ["Id", "Name", "ProfileIdentifier"]
+            );
+
+            if (!users || users.length === 0) {
+                return {
+                    title: "Could not verify owner information",
+                    status: "warning"
+                };
+            }
+
+            const ownerUser = users[0];
+            const userName = ownerUser.stringValue("Name");
+            const profile = ownerUser.stringValue("ProfileIdentifier") || "";
+
+            if (profile.includes("Medical") || profile.includes("Specialist")) {
+                return {
+                    title: `Assigned to medical specialist: ${userName}`,
+                    status: "success"
+                };
+            }
+
             return {
-                title: `All ${results.totalSize} inquiry questions have responses`,
-                status: 'success'
+                title: "Consider reassigning to a medical specialist before escalation",
+                status: "warning"
+            };
+        } catch (error) {
+            env.log("Error checking specialist assignment: " + error.message);
+            return {
+                title: "Error checking specialist assignment",
+                status: "error"
             };
         }
-
-        return {
-            title: `${missingResponses} of ${results.totalSize} questions still need responses`,
-            status: 'warning'
-        };
     }
 
-    /**
-     * Check if priority level is set
-     * @returns {Object} Result object with title and status
-     */
-    checkPrioritySet() {
-        const priority = this.record.stringValue('Priority');
+    function checkAdverseEventScreening() {
+        try {
+            const adverseEventIndicator = record.stringValue("AdverseEventIndicator");
 
-        if (priority && priority.trim().length > 0) {
+            if (adverseEventIndicator === "true" || adverseEventIndicator === "Yes") {
+                return {
+                    title: "Adverse event screening completed",
+                    status: "success"
+                };
+            }
+
             return {
-                title: `Priority level set to ${priority}`,
-                status: 'success'
+                title: "Adverse event screening has not been performed",
+                status: "warning"
+            };
+        } catch (error) {
+            env.log("Error checking adverse event screening: " + error.message);
+            return {
+                title: "Error checking adverse event screening",
+                status: "error"
             };
         }
-
-        return {
-            title: 'Priority level has not been set',
-            status: 'warning'
-        };
     }
 
-    /**
-     * Check if inquiry is assigned to a medical specialist
-     * @returns {Promise<Object>} Result object with title and status
-     */
-    async checkAssignedToSpecialist() {
-        const dataService = getDataService();
-        const ownerId = this.record.stringValue('OwnerId');
-
-        if (!ownerId) {
-            return {
-                title: 'No owner assigned',
-                status: 'warning'
-            };
-        }
-
-        const query = dataService.newQuery('User');
-        const userCondition = query.fields.stringField('Id').eq(ownerId);
-        query.where(userCondition);
-
-        const results = await query.fetch();
-
-        if (results.totalSize === 0) {
-            return {
-                title: 'Could not verify owner information',
-                status: 'warning'
-            };
-        }
-
-        const user = results.records[0];
-        const userName = user.stringValue('Name');
-        const profile = user.stringValue('Profile.Name') || '';
-
-        if (profile.includes('Medical') || profile.includes('Specialist')) {
-            return {
-                title: `Assigned to medical specialist: ${userName}`,
-                status: 'success'
-            };
-        }
-
-        return {
-            title: 'Consider reassigning to a medical specialist before escalation',
-            status: 'warning'
-        };
-    }
-
-    /**
-     * Check if adverse event screening has been performed
-     * @param {Object} contextData - Parsed context data
-     * @returns {Object} Result object with title and status
-     */
-    checkAdverseEventScreening(contextData) {
-        const adverseEventIndicator = this.record.stringValue('AdverseEventIndicator') ||
-                                     contextData.Inquiry?.AdverseEventIndicator;
-
-        if (adverseEventIndicator === 'true' || adverseEventIndicator === true) {
-            return {
-                title: 'Adverse event screening completed',
-                status: 'success'
-            };
-        }
-
-        return {
-            title: 'Adverse event screening has not been performed',
-            status: 'warning'
-        };
-    }
-}
+    return [
+        checkResponseDocumented(),
+        Promise.resolve(checkPrioritySet()),
+        checkAssignedToSpecialist(),
+        Promise.resolve(checkAdverseEventScreening())
+    ];
+})();

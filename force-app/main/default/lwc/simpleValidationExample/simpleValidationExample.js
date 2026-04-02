@@ -1,66 +1,45 @@
 /**
  * Simple Validation Example
  *
- * This is the simplest possible custom script validation example.
- * It demonstrates the basic structure and format for custom scripts.
+ * Minimal starter template demonstrating the basic validation script pattern.
+ * Use this as a starting point for building custom validation scripts.
  *
  * CUSTOM SCRIPT BASICS:
- * - Custom scripts are headless LWC components (no HTML template needed)
- * - They must have an @api execute() method that returns an array of results
- * - Each result is an object with: {title: string, status: string}
- * - Status can be: "success", "error", or "warning"
+ * - Scripts use IIFE (Immediately Invoked Function Expression) pattern
+ * - No imports needed - record, user, db, env are globally available
+ * - Must return an array of result objects (or Promises that resolve to them)
+ * - Each result: {title: string, status: "success"|"error"|"warning"}
  *
- * OUTPUT FORMAT:
- * [{title: "message", status: "success"|"error"|"warning"}]
+ * STATUS MEANINGS (for validations):
+ * - "success" = validation passes
+ * - "warning" = shows warning dialog but allows user to proceed
+ * - "error"   = blocks the action and shows error dialog
  *
- * STATUS MEANINGS (for checklists):
- * - success = green check mark (condition met)
- * - warning = yellow alert (something to review)
- * - error = red X (critical issue)
+ * Available globals: record, user, db, env
  */
-import { LightningElement, api } from 'lwc';
-
-export default class SimpleValidationExample extends LightningElement {
-    // The @api record property provides access to the current record
-    // You can use record.stringValue('FieldName') to get field values
-    @api record;
-
-    /**
-     * The execute method is called by the custom script framework.
-     * It must return an array of result objects.
-     *
-     * @returns {Array} Array of {title: string, status: string} objects
-     */
-    @api
-    execute() {
-        const results = [];
-
-        // Example validation: Check if Status field is populated
+(() => {
+    function validateStatus() {
         try {
-            const status = this.record.stringValue('Status');
+            const status = record.stringValue("Status");
 
             if (status && status.trim().length > 0) {
-                // Status is set - validation passes
-                results.push({
+                return {
                     title: `Status is set to: ${status}`,
-                    status: 'success'
-                });
-            } else {
-                // Status is empty - show warning
-                results.push({
-                    title: 'Status field is empty - please set a status value',
-                    status: 'warning'
-                });
+                    status: "success"
+                };
             }
-        } catch (error) {
-            // If something goes wrong, show error
-            results.push({
-                title: `Error checking status: ${error.message}`,
-                status: 'error'
-            });
-        }
 
-        // Return the results array
-        return results;
+            return {
+                title: "Status field is empty - please set a status value",
+                status: "warning"
+            };
+        } catch (error) {
+            return {
+                title: `Error checking status: ${error.message}`,
+                status: "error"
+            };
+        }
     }
-}
+
+    return [validateStatus()];
+})();
