@@ -4,7 +4,10 @@
  * Workflow Validation script for medical inquiry records.
  * Validates inquiry questions, type, and required fields before advancing stages.
  *
- * Type: Validation | Runs on: Any workflow action
+ * Type: Validation | Runs on: Any workflow action (RecordUpdate actions only)
+ *
+ * IMPORTANT: The returned array must contain individual promises, each resolving
+ * to a single {title, status} object. Do NOT wrap multiple results in one promise.
  *
  * Available globals: record, user, db, env
  * Available classes: ConditionBuilder, FieldCondition, SetCondition, AndCondition, OrCondition
@@ -34,7 +37,7 @@
             }
 
             return {
-                title: `Inquiry Questions Added (${inquiryQuestions.length})`,
+                title: "Inquiry Questions Added (" + inquiryQuestions.length + ")",
                 status: "success"
             };
         } catch (error) {
@@ -58,7 +61,7 @@
             }
 
             return {
-                title: `Inquiry Type: ${inquiryType}`,
+                title: "Inquiry Type: " + inquiryType,
                 status: "success"
             };
         } catch (error) {
@@ -76,31 +79,16 @@
             const priority = record.stringValue("Priority");
             const accountId = record.stringValue("AccountId");
 
-            const errors = [];
+            const missing = [];
+            if (!subject) missing.push("Subject");
+            if (!priority) missing.push("Priority");
+            if (!accountId) missing.push("Account");
 
-            if (!subject) {
-                errors.push({
-                    title: "Subject is required",
+            if (missing.length > 0) {
+                return {
+                    title: "Required fields missing: " + missing.join(", "),
                     status: "error"
-                });
-            }
-
-            if (!priority) {
-                errors.push({
-                    title: "Priority is required",
-                    status: "error"
-                });
-            }
-
-            if (!accountId) {
-                errors.push({
-                    title: "Account is required",
-                    status: "error"
-                });
-            }
-
-            if (errors.length > 0) {
-                return errors;
+                };
             }
 
             return {
@@ -116,23 +104,9 @@
         }
     }
 
-    async function runAllValidations() {
-        try {
-            const results = await Promise.all([
-                validateInquiryQuestions(),
-                Promise.resolve(validateInquiryType()),
-                Promise.resolve(validateRequiredFields())
-            ]);
-
-            return results.flat();
-        } catch (error) {
-            env.log("Error in inquiry validation: " + error.message);
-            return [{
-                title: "Validation error occurred",
-                status: "error"
-            }];
-        }
-    }
-
-    return [runAllValidations()];
+    return [
+        validateInquiryQuestions(),
+        validateInquiryType(),
+        validateRequiredFields()
+    ];
 })();

@@ -140,23 +140,9 @@
         }
     }
 
-    async function runAllValidations() {
-        try {
-            const results = await Promise.all([
-                validateComplianceAgreement(),
-                Promise.resolve(validateSignatureRequired()),
-                validateAdverseEventReporting()
-            ]);
-
-            return results.flat();
-        } catch (error) {
-            env.log("Error in compliance validation: " + error.message);
-            return [{
-                title: "Validation error occurred",
-                status: "error"
-            }];
-        }
-    }
-
-    return [runAllValidations()];
+    return [
+        validateComplianceAgreement(),
+        validateSignatureRequired(),
+        validateAdverseEventReporting()
+    ];
 })();
