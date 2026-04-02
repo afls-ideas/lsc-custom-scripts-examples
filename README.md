@@ -1,5 +1,9 @@
 # Life Sciences Cloud - Custom Scripts Examples
 
+<a href="https://githubsfdeploy.herokuapp.com?owner=afls-ideas&repo=lsc-custom-scripts-examples">
+  <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+</a>
+
 A collection of pharma-specific example custom scripts that can be deployed into a Salesforce org with Life Sciences Cloud. These examples demonstrate validation, checklist, and visit action patterns for Customer Engagement workflows.
 
 ## Overview
