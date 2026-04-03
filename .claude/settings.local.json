@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ':*)",
+      "mcp__codesearch__search",
+      "mcp__codesearch__list_hosts",
+      "Bash(ffmpeg:*)"
+    ]
+  }
+}

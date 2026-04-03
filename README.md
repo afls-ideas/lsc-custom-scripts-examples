@@ -76,7 +76,7 @@ Here is `visitVal02DetailAndSample` running as a Visit Action Validation — it 
 
 While many of these examples could be achieved using simple validation rules directly on the object, they are provided here so you can combine multiple rules together into a single custom script. Since only one Visit Action Validation script runs per org, this is the recommended approach for real implementations.
 
-22 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
+10 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
 
 #### Sync vs Async
 
@@ -97,18 +97,6 @@ As a rule of thumb: if the data you need is on the visit or its direct child rec
 | 08 | `visitVal08MaxSamplesPerProduct` | Limit sample quantity per product per visit | ProductDisbursement | Sync |
 | 09 | `visitVal09ChannelSpecific` | In-Person visits require detailed products | ProviderVisit, ProviderVisitProdDetailing | Sync |
 | 10 | `visitVal10ProfileBasedMessage` | Field Sales Reps must deliver messages on In-Person visits | UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Async |
-| 11 | `visitVal11SampleLotExpiry` | Block samples from expired lots | ProductDisbursement, ProductItem | Async |
-| 12 | `visitVal12ControlledSubstance` | Require signature when sampling controlled substances | ProductDisbursement, ProductItem, Product2, ProviderVisit | Async |
-| 13 | `visitVal13VisitNotesRequired` | Require visit notes before submission | ProviderVisit | Sync |
-| 14 | `visitVal14MaxAttendees` | Limit total attendees per visit | ChildVisit | Sync |
-| 15 | `visitVal15CallObjective` | Require a call objective before submitting | ProviderVisit | Sync |
-| 16 | `visitVal16AdverseEvent` | Require detailed notes when adverse event reported | ProviderVisit | Sync |
-| 17 | `visitVal17TerritoryAlignment` | Verify account is in rep's territory | ObjectTerritory2Association, UserTerritory2Association | Async |
-| 18 | `visitVal18ConsentVerification` | Verify HCP consent on file before sampling | ProductDisbursement, IndividualConsent | Async |
-| 19 | `visitVal19DuplicateVisit` | Warn if visit to same account already exists today | ProviderVisit | Async |
-| 20 | `visitVal20VisitDuration` | Flag unreasonable visit durations (too short/long) | ProviderVisit | Sync |
-| 21 | `visitVal21OffLabelPrevention` | Block detailing products not approved for HCP specialty | ProviderVisitProdDetailing, Account, Product2 | Async |
-| 22 | `visitVal22FormularyStatus` | Block sampling non-formulary products at HCOs | ProductDisbursement, ProductItem, Account, FormularyProduct | Async |
 
 
 ### Workflow Validation
@@ -134,7 +122,7 @@ force-app/main/default/lwc/
 ├── visitSampleScript/            # Visit Action Validation - sample & detail checks
 ├── visitActionValidation/        # Visit Action Validation - minimal template
 ├── visitVal01AtLeastOneSample/   # through
-├── visitVal22FormularyStatus/    # 22 pharma-domain validation LWCs
+├── visitVal10ProfileBasedMessage/ # 10 pharma-domain validation LWCs
 ├── inquiryValidationScript/      # Validation - medical inquiry workflow
 ├── complianceValidationScript/   # Validation - compliance & adverse events
 ├── visitPreparationChecklist/    # Checklist - visit preparation steps
