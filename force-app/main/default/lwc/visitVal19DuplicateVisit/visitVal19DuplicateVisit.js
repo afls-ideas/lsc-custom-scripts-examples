@@ -1,12 +1,3 @@
-/**
- * 19. Duplicate Visit Prevention
- *
- * Warns if the rep has already submitted a visit to the same account
- * on the same day. Prevents accidental duplicate call reports.
- *
- * Related objects: ProviderVisit
- * Pattern: db.query date-range search (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     async function duplicateVisitPrevention(contextData) {
@@ -82,8 +77,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await duplicateVisitPrevention(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

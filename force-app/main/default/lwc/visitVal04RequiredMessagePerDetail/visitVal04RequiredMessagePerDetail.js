@@ -1,12 +1,3 @@
-/**
- * 04. Required Message Per Detail
- *
- * Each detailed product must have at least one key message delivered.
- * Ensures reps are not just logging details without actual messaging.
- *
- * Related objects: ProviderVisitProdDetailing, ProviderVisitDtlProductMsg
- * Pattern: parseContextData nested loop (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     function requiredMessagePerDetail(contextData) {
@@ -49,8 +44,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [requiredMessagePerDetail(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

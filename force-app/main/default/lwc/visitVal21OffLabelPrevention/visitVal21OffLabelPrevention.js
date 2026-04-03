@@ -1,13 +1,3 @@
-/**
- * 21. Off-Label Product Prevention
- *
- * Prevents detailing products that are not approved for the
- * visited account's specialty. Queries the account's specialty
- * and validates against each detailed product's approved specialties.
- *
- * Related objects: ProviderVisitProdDetailing, Account, Product2
- * Pattern: db.query cross-reference (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -21,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function offLabelProductPrevention(contextData) {
@@ -88,8 +82,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await offLabelProductPrevention(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

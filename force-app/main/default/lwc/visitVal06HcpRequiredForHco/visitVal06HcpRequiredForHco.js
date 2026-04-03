@@ -1,12 +1,3 @@
-/**
- * 06. HCP Required for HCO Visit
- *
- * When visiting an HCO (Healthcare Organization / Institution), at least
- * one HCP (Healthcare Professional / Person Account) attendee must be added.
- *
- * Related objects: Account, ChildVisit
- * Pattern: db.query + ConditionBuilder (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     async function hcpRequiredForHco(contextData) {
@@ -83,8 +78,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await hcpRequiredForHco(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

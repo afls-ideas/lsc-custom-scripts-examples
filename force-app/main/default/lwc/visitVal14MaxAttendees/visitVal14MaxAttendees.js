@@ -1,12 +1,3 @@
-/**
- * 14. Max Attendees Limit
- *
- * Limits the total number of attendees on a group visit.
- * Prevents unreasonably large meetings that may violate compliance.
- *
- * Related objects: ChildVisit
- * Pattern: parseContextData count check (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     function maxAttendeesLimit(contextData) {
@@ -44,8 +39,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [maxAttendeesLimit(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

@@ -1,12 +1,3 @@
-/**
- * 07. Single HCO Attendee Limit
- *
- * Only one HCO (Healthcare Organization) attendee can be added per visit.
- * Multiple HCP attendees are allowed, but only one institution.
- *
- * Related objects: Account, ChildVisit
- * Pattern: db.query + count (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     async function singleHcoAttendee(contextData) {
@@ -65,8 +60,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await singleHcoAttendee(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

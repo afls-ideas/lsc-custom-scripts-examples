@@ -1,12 +1,3 @@
-/**
- * 12. Controlled Substance Signature Required
- *
- * If any sampled product is flagged as a controlled substance,
- * the visit must have a signature captured before submission.
- *
- * Related objects: ProductDisbursement, ProductItem, Product2, ProviderVisit
- * Pattern: db.query chain (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function controlledSubstanceSignature(contextData) {
@@ -94,8 +89,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await controlledSubstanceSignature(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

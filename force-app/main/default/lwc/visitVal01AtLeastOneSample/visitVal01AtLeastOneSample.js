@@ -1,12 +1,3 @@
-/**
- * 01. At Least One Sample Required
- *
- * Ensures the rep has added at least one sample (ProductDisbursement)
- * before submitting the visit.
- *
- * Related objects: ProductDisbursement
- * Pattern: parseContextData + getFieldData (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     function atLeastOneSampleIsRequired(contextData) {
@@ -42,8 +37,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [atLeastOneSampleIsRequired(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

@@ -1,13 +1,3 @@
-/**
- * 11. Sample Lot Expiry Check
- *
- * Prevents reps from leaving samples whose lot has expired.
- * Queries the ProductItem (lot) record for each disbursement
- * and compares the ExpirationDate to today.
- *
- * Related objects: ProductDisbursement, ProductItem
- * Pattern: db.query + date comparison (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -21,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function sampleLotExpiryCheck(contextData) {
@@ -67,8 +61,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await sampleLotExpiryCheck(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

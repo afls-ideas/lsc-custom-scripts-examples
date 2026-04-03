@@ -1,12 +1,3 @@
-/**
- * 09. Channel-Specific Validation — In-Person Visits Require Details
- *
- * In-Person visits must have at least one detailed product. Remote/virtual
- * visits are exempt from this requirement.
- *
- * Related objects: ProviderVisit, ProviderVisitProdDetailing
- * Pattern: parseContextData field check (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     function inPersonRequiresDetails(contextData) {
@@ -55,8 +50,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [inPersonRequiresDetails(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

@@ -1,12 +1,3 @@
-/**
- * 02. At Least One Detail and Sample Required
- *
- * Ensures the visit has both at least one detailed product
- * (ProviderVisitProdDetailing) and one sample (ProductDisbursement).
- *
- * Related objects: ProductDisbursement, ProviderVisitProdDetailing
- * Pattern: parseContextData + getFieldData (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     function atLeastOneDetailAndSample(contextData) {
@@ -49,8 +44,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [atLeastOneDetailAndSample(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

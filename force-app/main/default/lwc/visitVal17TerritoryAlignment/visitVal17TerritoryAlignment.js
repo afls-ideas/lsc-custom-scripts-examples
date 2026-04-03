@@ -1,12 +1,3 @@
-/**
- * 17. Territory Alignment Check
- *
- * Validates that the visited account belongs to the rep's assigned
- * territory. Prevents reps from logging visits to out-of-territory accounts.
- *
- * Related objects: ProviderVisit, ObjectTerritory2Association, UserTerritory2Association
- * Pattern: db.query + user territory comparison (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     async function territoryAlignmentCheck(contextData) {
@@ -86,8 +81,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await territoryAlignmentCheck(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

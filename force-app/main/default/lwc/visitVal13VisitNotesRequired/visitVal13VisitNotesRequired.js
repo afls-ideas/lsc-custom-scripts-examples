@@ -1,12 +1,3 @@
-/**
- * 13. Visit Notes Required
- *
- * Ensures the rep has entered visit notes before submitting.
- * Common compliance requirement for auditable call reports.
- *
- * Related objects: ProviderVisit
- * Pattern: parseContextData field check (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -16,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     function visitNotesRequired(contextData) {
@@ -42,8 +37,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [visitNotesRequired(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

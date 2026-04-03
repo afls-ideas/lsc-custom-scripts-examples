@@ -1,12 +1,3 @@
-/**
- * 10. Profile-Based Message Requirement
- *
- * Field Sales Representatives must deliver at least one key message per
- * detailed product on In-Person visits. Other profiles are exempt.
- *
- * Related objects: UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg
- * Pattern: db.query for user profile + context data check (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function profileBasedMessageCheck(contextData) {
@@ -80,8 +75,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await profileBasedMessageCheck(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

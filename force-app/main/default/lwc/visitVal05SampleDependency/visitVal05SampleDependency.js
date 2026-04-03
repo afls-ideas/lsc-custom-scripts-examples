@@ -1,12 +1,3 @@
-/**
- * 05. Sample Dependency — If Product A Sampled, Product B Must Also Be Sampled
- *
- * Enforces co-sampling rules. For example, if a starter pack is sampled,
- * the corresponding maintenance therapy must also be sampled.
- *
- * Related objects: ProductDisbursement, ProductItem, Product2
- * Pattern: db.query chain (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function sampleDependencyCheck(contextData) {
@@ -83,8 +78,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await sampleDependencyCheck(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

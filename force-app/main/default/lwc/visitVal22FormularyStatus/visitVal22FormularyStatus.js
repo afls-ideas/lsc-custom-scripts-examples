@@ -1,13 +1,3 @@
-/**
- * 22. Formulary Status Warning
- *
- * Checks if sampled products are on the visited HCO's formulary.
- * If a product is not on formulary, blocks submission to avoid
- * wasting samples on products the institution cannot prescribe.
- *
- * Related objects: ProductDisbursement, ProductItem, Account, FormularyProduct__c
- * Pattern: db.query cross-reference (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -21,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function formularyStatusWarning(contextData) {
@@ -110,8 +104,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await formularyStatusWarning(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

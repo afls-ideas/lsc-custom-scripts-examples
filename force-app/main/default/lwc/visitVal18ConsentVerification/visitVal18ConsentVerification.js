@@ -1,12 +1,3 @@
-/**
- * 18. Consent Verification Before Sampling
- *
- * If samples are being left, verifies that the HCP has an active
- * consent record on file. Required for PDMA compliance.
- *
- * Related objects: ProductDisbursement, IndividualConsent (or custom)
- * Pattern: db.query consent check (async)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function consentVerificationBeforeSampling(contextData) {
@@ -84,8 +79,8 @@
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var result = await consentVerificationBeforeSampling(contextData);
             var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

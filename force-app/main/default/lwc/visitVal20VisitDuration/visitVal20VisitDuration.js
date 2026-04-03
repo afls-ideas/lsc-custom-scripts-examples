@@ -1,13 +1,3 @@
-/**
- * 20. Visit Duration Validation
- *
- * Ensures the visit duration is within a reasonable range.
- * Flags visits shorter than 2 minutes (likely errors) or
- * longer than 4 hours (likely forgot to check out).
- *
- * Related objects: ProviderVisit
- * Pattern: parseContextData date math (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -17,6 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
     }
 
     function visitDurationValidation(contextData) {
@@ -62,8 +56,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [visitDurationValidation(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }

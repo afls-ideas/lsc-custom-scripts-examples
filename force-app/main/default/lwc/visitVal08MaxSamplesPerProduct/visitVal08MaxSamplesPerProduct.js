@@ -1,12 +1,3 @@
-/**
- * 08. Max Samples Per Product
- *
- * Limits the quantity of samples that can be left per product per visit.
- * Prevents reps from over-sampling a single product (regulatory compliance).
- *
- * Related objects: ProductDisbursement
- * Pattern: parseContextData + loop aggregation (synchronous)
- */
 (() => {
     function parseContextData(record) {
         try {
@@ -20,6 +11,10 @@
 
     function getFieldData(contextData, baseFieldName) {
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     function maxSamplesPerProduct(contextData) {
@@ -58,8 +53,8 @@
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
             var results = [maxSamplesPerProduct(contextData)];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+            if (hasWebField) { var resolved = await Promise.all(results); return unwrapProxy(resolved); }
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Validation error: ' + error.message, status: 'error' }];
         }
