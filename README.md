@@ -256,6 +256,7 @@ The `LifeScienceCustomScript` object defaults to Private sharing. Rep users need
 
 - **CodeText is the runtime source of truth.** The platform executes from the `CodeText` field, not the deployed LWC. Always click Refresh after deploying.
 - **CodeText is read-only via API.** You cannot update it programmatically — only through the Refresh button.
+- **No comment blocks before the IIFE.** JSDoc or multi-line comment blocks (`/** ... */`) before the opening `(() => {` cause Locker Service to silently fail — the platform shows a generic error with zero console output. Put comments inside the IIFE if needed.
 - **Large scripts crash silently.** If a script is too large, Locker Service fails to evaluate it and the platform shows a generic error with no console output. Keep scripts small and focused.
 - **Proxy wrapping.** Return values get wrapped in Locker Service Proxy objects. The platform's `translateValidationResults` cannot read Proxy-wrapped results. **You must call `unwrapProxy(results)`** (i.e., `JSON.parse(JSON.stringify(results))`) before returning from `validateVisit()`. Without this, the platform silently allows the visit through.
 - **Only one Visit Action Validation runs.** First by ID/creation date. Put all rules in one script.

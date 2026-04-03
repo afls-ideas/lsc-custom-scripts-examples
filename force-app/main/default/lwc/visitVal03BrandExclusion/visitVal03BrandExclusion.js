@@ -1,13 +1,3 @@
-/**
- * 03. Brand Exclusion - Competing Brands Cannot Be Detailed Together
- *
- * Prevents detailing products from competing brand families on the
- * same visit. Reads product names from the AdditionalInformation JSON
- * on each ProviderVisitProdDetailing record.
- *
- * Related objects: ProviderVisitProdDetailing
- * Pattern: parseContextData + AdditionalInformation parsing (synchronous)
- */
 (() => {
     console.log('[visitVal03] Script loaded');
 
