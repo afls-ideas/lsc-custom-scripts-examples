@@ -130,6 +130,13 @@ Validation scripts use a simpler pattern — no platform detection needed:
 
 22 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
 
+#### Sync vs Async
+
+- **Sync** — The validation only reads data already available in the visit context payload (`contextData`). Objects like `ProductDisbursement`, `ProviderVisitProdDetailing`, `ProviderVisit`, and `ChildVisit` are included in the context when the platform calls the script. No database query is needed, so the function runs synchronously.
+- **Async** — The validation needs to look up related records that are **not** included in the context payload. For example, checking whether an Account is a Person Account (`IsPersonAccount`), looking up a product's brand from `Product2`, or querying territory assignments. These require `await db.query(...)`, making the function asynchronous.
+
+As a rule of thumb: if the data you need is on the visit or its direct child records (samples, details, attendees, messages), it's in the context and you can use sync. If you need data from a related object like `Account`, `Product2`, `UserAdditionalInfo`, or `ObjectTerritory2Association`, you'll need an async `db.query`.
+
 | # | LWC Component | Description | Objects Used | Sync/Async |
 |---|--------------|-------------|-------------|------------|
 | 01 | `visitVal01AtLeastOneSample` | Require at least one sample per visit | ProductDisbursement | Sync |
