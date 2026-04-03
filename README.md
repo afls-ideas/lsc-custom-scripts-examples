@@ -6,6 +6,30 @@
 
 A collection of small, focused example custom scripts for Life Sciences Cloud for Customer Engagement. Each example demonstrates one specific validation or checklist pattern that you can combine into your own scripts.
 
+## Choosing a Validation Mechanism
+
+```mermaid
+flowchart TD
+    A[Need to validate a visit?] --> B{Single object?\nSimple field-level check?}
+    B -- Yes --> C[Validation Rule]
+    B -- No --> D{Spans multiple objects?\nComplex logic?}
+    D -- Yes --> E{Data available\non mobile?}
+    E -- Yes --> F[Custom Script\nVisit Action Validation]
+    E -- No --> G[Apex Trigger\nLast resort — online only]
+
+    style C fill:#2e7d32,color:#fff
+    style F fill:#1565c0,color:#fff
+    style G fill:#e65100,color:#fff
+```
+
+| Mechanism | When to use | Online | Offline |
+|-----------|------------|--------|---------|
+| **Validation Rule** | Simple, single-object checks that can be expressed with Salesforce's standard validation rule formulas | Yes | Yes |
+| **Custom Script (Visit Action Validation)** | Complex validations spanning multiple objects (samples, details, attendees, etc.) | Yes | Yes |
+| **Apex Trigger** | Last resort — when the validation requires data that is not available on the mobile device | Yes | No |
+
+Start with validation rules whenever possible. They work both online and offline and require no code. Move to Custom Script Visit Action Validation when the logic spans multiple objects or needs conditional checks that validation rules can't express. Use Apex triggers only when the required data isn't synced to the mobile app — triggers fire server-side only, so they won't protect offline users.
+
 ## How Custom Scripts Work
 
 Custom scripts are headless LWC components deployed to your org. The platform stores the JavaScript in the `CodeText` field of `LifeScienceCustomScript` records and executes it from there — not from the deployed LWC directly. After updating an LWC, you must click **Refresh** in Admin Console to sync the code. This copies the script to the `CodeText` field.
@@ -40,90 +64,17 @@ When creating `LifeScienceCustomScript` records:
 
 Without `ObjectName` and `OperationEventType`, Visit Action Validation scripts silently don't execute.
 
-## Confirmed Working Pattern (Web)
-
-This is the pattern confirmed working on desktop/web. The key requirements:
-
-1. IIFE returns `[validateVisit()]` — array wrapping a **called** async function (Promise)
-2. `validateVisit()` returns an **array** of `{title, status}` objects
-3. Platform detection via `parseContextData(record)` — check for `ProviderVisit` key
-4. Web uses `Promise.all()` wrapping; mobile does not
-5. **`unwrapProxy()`** — strip Locker Service Proxy wrappers with `JSON.parse(JSON.stringify(results))` before returning
-6. Guard with `if (record && user && env && db)` before executing
-
-```javascript
-(() => {
-    function parseContextData(record) {
-        try {
-            if (!record || typeof record.getContextData !== 'function') return {};
-            var contextData = record.getContextData();
-            if (typeof contextData === 'string') return JSON.parse(contextData);
-            if (typeof contextData === 'object' && contextData !== null) return contextData;
-            return {};
-        } catch (e) { return {}; }
-    }
-
-    function unwrapProxy(results) {
-        return JSON.parse(JSON.stringify(results));
-    }
-
-    async function validateVisit() {
-        try {
-            var contextData = parseContextData(record);
-            var hasWebField = contextData['ProviderVisit'] !== undefined;
-
-            // Your validation logic here
-            var results = [
-                { title: "Validation passed", status: "success" },
-                { title: "Missing required data", status: "error" }
-            ];
-
-            if (hasWebField) {
-                var resolved = await Promise.all(results);
-                return unwrapProxy(resolved);
-            }
-            return unwrapProxy(results);
-        } catch (error) {
-            return [{ title: 'Error: ' + error.message, status: 'error' }];
-        }
-    }
-
-    if (record && user && env && db) {
-        var contextData = parseContextData(record);
-        var hasWebField = contextData['ProviderVisit'] !== undefined;
-        if (hasWebField) {
-            return [validateVisit()];
-        } else {
-            return validateVisit();
-        }
-    }
-})();
-```
-
 For details on the context data JSON structure returned by `record.getContextData()`, see [CONTEXT_DATA_REFERENCE.md](CONTEXT_DATA_REFERENCE.md).
-
-### Validation Script Pattern (for Workflow)
-
-Validation scripts use a simpler pattern — no platform detection needed:
-
-```javascript
-(() => {
-    async function validateSomething() {
-        try {
-            // Your validation logic using record, db, env globals
-            return { title: "Validation passed", status: "success" };
-        } catch (error) {
-            return { title: "Error: " + error.message, status: "error" };
-        }
-    }
-
-    return [validateSomething()];
-})();
-```
 
 ## Examples
 
+Here is `visitVal02DetailAndSample` running as a Visit Action Validation — it requires both samples and detailed products before the visit can be submitted:
+
+![visitVal02DetailAndSample example](assets/CustomScript_VisitActionValidation_Example.gif)
+
 ### Visit Action Validation — Pharma Domain Examples
+
+While many of these examples could be achieved using simple validation rules directly on the object, they are provided here so you can combine multiple rules together into a single custom script. Since only one Visit Action Validation script runs per org, this is the recommended approach for real implementations.
 
 22 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
 
