@@ -128,32 +128,34 @@ Validation scripts use a simpler pattern — no platform detection needed:
 
 ### Visit Action Validation — Pharma Domain Examples
 
-Individual validation functions you can combine into a single Visit Action Validation script. Located in `examples/visit-action-validations/`.
+22 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
 
-| # | File | Description | Objects Used | Sync/Async |
-|---|------|-------------|-------------|------------|
-| 01 | `at-least-one-sample.js` | Require at least one sample per visit | ProductDisbursement | Sync |
-| 02 | `at-least-one-detail-and-sample.js` | Require both samples and detailed products | ProductDisbursement, ProviderVisitProdDetailing | Sync |
-| 03 | `brand-exclusion.js` | Prevent detailing competing brands together | ProviderVisitProdDetailing, ProductItem, Product2 | Async |
-| 04 | `required-message-per-detail.js` | Each detail must have at least one key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
-| 05 | `sample-dependency.js` | If product A sampled, product B must also be sampled | ProductDisbursement, ProductItem, Product2 | Async |
-| 06 | `hcp-required-for-hco.js` | HCO visits require at least one HCP attendee | Account, ChildVisit | Async |
-| 07 | `single-hco-attendee.js` | Max one HCO attendee per visit | Account, ChildVisit | Async |
-| 08 | `max-samples-per-product.js` | Limit sample quantity per product per visit | ProductDisbursement | Sync |
-| 09 | `channel-specific-validation.js` | In-Person visits require detailed products | ProviderVisit, ProviderVisitProdDetailing | Sync |
-| 10 | `profile-based-message-check.js` | Field Sales Reps must deliver messages on In-Person visits | UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Async |
-| 11 | `sample-lot-expiry-check.js` | Block samples from expired lots | ProductDisbursement, ProductItem | Async |
-| 12 | `controlled-substance-signature.js` | Require signature when sampling controlled substances | ProductDisbursement, ProductItem, Product2, ProviderVisit | Async |
-| 13 | `visit-notes-required.js` | Require visit notes before submission | ProviderVisit | Sync |
-| 14 | `max-attendees-limit.js` | Limit total attendees per visit | ChildVisit | Sync |
-| 15 | `call-objective-required.js` | Require a call objective before submitting | ProviderVisit | Sync |
-| 16 | `adverse-event-flag.js` | Require detailed notes when adverse event reported | ProviderVisit | Sync |
-| 17 | `territory-alignment-check.js` | Verify account is in rep's territory | ObjectTerritory2Association, UserTerritory2Association | Async |
-| 18 | `consent-verification.js` | Verify HCP consent on file before sampling | ProductDisbursement, IndividualConsent | Async |
-| 19 | `duplicate-visit-prevention.js` | Warn if visit to same account already exists today | ProviderVisit | Async |
-| 20 | `visit-duration-validation.js` | Flag unreasonable visit durations (too short/long) | ProviderVisit | Sync |
-| 21 | `off-label-product-prevention.js` | Block detailing products not approved for HCP specialty | ProviderVisitProdDetailing, Account, Product2 | Async |
-| 22 | `formulary-status-warning.js` | Block sampling non-formulary products at HCOs | ProductDisbursement, ProductItem, Account, FormularyProduct | Async |
+| # | LWC Component | Description | Objects Used | Sync/Async |
+|---|--------------|-------------|-------------|------------|
+| 01 | `visitVal01AtLeastOneSample` | Require at least one sample per visit | ProductDisbursement | Sync |
+| 02 | `visitVal02DetailAndSample` | Require both samples and detailed products | ProductDisbursement, ProviderVisitProdDetailing | Sync |
+| 03 | `visitVal03BrandExclusion` | Prevent detailing competing brands together | ProviderVisitProdDetailing, ProductItem, Product2 | Async |
+| 04 | `visitVal04RequiredMessagePerDetail` | Each detail must have at least one key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
+| 05 | `visitVal05SampleDependency` | If product A sampled, product B must also be sampled | ProductDisbursement, ProductItem, Product2 | Async |
+| 06 | `visitVal06HcpRequiredForHco` | HCO visits require at least one HCP attendee | Account, ChildVisit | Async |
+| 07 | `visitVal07SingleHcoAttendee` | Max one HCO attendee per visit | Account, ChildVisit | Async |
+| 08 | `visitVal08MaxSamplesPerProduct` | Limit sample quantity per product per visit | ProductDisbursement | Sync |
+| 09 | `visitVal09ChannelSpecific` | In-Person visits require detailed products | ProviderVisit, ProviderVisitProdDetailing | Sync |
+| 10 | `visitVal10ProfileBasedMessage` | Field Sales Reps must deliver messages on In-Person visits | UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Async |
+| 11 | `visitVal11SampleLotExpiry` | Block samples from expired lots | ProductDisbursement, ProductItem | Async |
+| 12 | `visitVal12ControlledSubstance` | Require signature when sampling controlled substances | ProductDisbursement, ProductItem, Product2, ProviderVisit | Async |
+| 13 | `visitVal13VisitNotesRequired` | Require visit notes before submission | ProviderVisit | Sync |
+| 14 | `visitVal14MaxAttendees` | Limit total attendees per visit | ChildVisit | Sync |
+| 15 | `visitVal15CallObjective` | Require a call objective before submitting | ProviderVisit | Sync |
+| 16 | `visitVal16AdverseEvent` | Require detailed notes when adverse event reported | ProviderVisit | Sync |
+| 17 | `visitVal17TerritoryAlignment` | Verify account is in rep's territory | ObjectTerritory2Association, UserTerritory2Association | Async |
+| 18 | `visitVal18ConsentVerification` | Verify HCP consent on file before sampling | ProductDisbursement, IndividualConsent | Async |
+| 19 | `visitVal19DuplicateVisit` | Warn if visit to same account already exists today | ProviderVisit | Async |
+| 20 | `visitVal20VisitDuration` | Flag unreasonable visit durations (too short/long) | ProviderVisit | Sync |
+| 21 | `visitVal21OffLabelPrevention` | Block detailing products not approved for HCP specialty | ProviderVisitProdDetailing, Account, Product2 | Async |
+| 22 | `visitVal22FormularyStatus` | Block sampling non-formulary products at HCOs | ProductDisbursement, ProductItem, Account, FormularyProduct | Async |
+
+Standalone validation functions (without IIFE wrapper) are also available in `examples/visit-action-validations/` for reference.
 
 ### Workflow Validation
 
@@ -177,6 +179,8 @@ Individual validation functions you can combine into a single Visit Action Valid
 force-app/main/default/lwc/
 ├── visitSampleScript/            # Visit Action Validation - sample & detail checks
 ├── visitActionValidation/        # Visit Action Validation - minimal template
+├── visitVal01AtLeastOneSample/   # through
+├── visitVal22FormularyStatus/    # 22 pharma-domain validation LWCs
 ├── inquiryValidationScript/      # Validation - medical inquiry workflow
 ├── complianceValidationScript/   # Validation - compliance & adverse events
 ├── visitPreparationChecklist/    # Checklist - visit preparation steps
@@ -186,7 +190,7 @@ force-app/main/default/lwc/
 
 examples/visit-action-validations/
 ├── 01-at-least-one-sample.js     # through
-└── 22-formulary-status-warning.js  # 22 pharma-domain validation functions
+└── 22-formulary-status-warning.js  # 22 standalone validation functions (no IIFE wrapper)
 ```
 
 ## Quick Start
