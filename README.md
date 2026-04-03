@@ -119,12 +119,41 @@ Validation scripts use a simpler pattern — no platform detection needed:
 
 ## Examples
 
-### Visit Action Validation
+### Visit Action Validation — Deployable LWCs
 
 | Example | Description | Pattern |
 |---------|-------------|---------|
 | `visitSampleScript` | Checks for required samples and detailed products | `parseContextData` + `getFieldData` for web/mobile |
 | `visitActionValidation` | Minimal working template | Simplest possible Visit Action Validation |
+
+### Visit Action Validation — Pharma Domain Examples
+
+Individual validation functions you can combine into a single Visit Action Validation script. Located in `examples/visit-action-validations/`.
+
+| # | File | Description | Objects Used | Sync/Async |
+|---|------|-------------|-------------|------------|
+| 01 | `at-least-one-sample.js` | Require at least one sample per visit | ProductDisbursement | Sync |
+| 02 | `at-least-one-detail-and-sample.js` | Require both samples and detailed products | ProductDisbursement, ProviderVisitProdDetailing | Sync |
+| 03 | `brand-exclusion.js` | Prevent detailing competing brands together | ProviderVisitProdDetailing, ProductItem, Product2 | Async |
+| 04 | `required-message-per-detail.js` | Each detail must have at least one key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
+| 05 | `sample-dependency.js` | If product A sampled, product B must also be sampled | ProductDisbursement, ProductItem, Product2 | Async |
+| 06 | `hcp-required-for-hco.js` | HCO visits require at least one HCP attendee | Account, ChildVisit | Async |
+| 07 | `single-hco-attendee.js` | Max one HCO attendee per visit | Account, ChildVisit | Async |
+| 08 | `max-samples-per-product.js` | Limit sample quantity per product per visit | ProductDisbursement | Sync |
+| 09 | `channel-specific-validation.js` | In-Person visits require detailed products | ProviderVisit, ProviderVisitProdDetailing | Sync |
+| 10 | `profile-based-message-check.js` | Field Sales Reps must deliver messages on In-Person visits | UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Async |
+| 11 | `sample-lot-expiry-check.js` | Block samples from expired lots | ProductDisbursement, ProductItem | Async |
+| 12 | `controlled-substance-signature.js` | Require signature when sampling controlled substances | ProductDisbursement, ProductItem, Product2, ProviderVisit | Async |
+| 13 | `visit-notes-required.js` | Require visit notes before submission | ProviderVisit | Sync |
+| 14 | `max-attendees-limit.js` | Limit total attendees per visit | ChildVisit | Sync |
+| 15 | `call-objective-required.js` | Require a call objective before submitting | ProviderVisit | Sync |
+| 16 | `adverse-event-flag.js` | Require detailed notes when adverse event reported | ProviderVisit | Sync |
+| 17 | `territory-alignment-check.js` | Verify account is in rep's territory | ObjectTerritory2Association, UserTerritory2Association | Async |
+| 18 | `consent-verification.js` | Verify HCP consent on file before sampling | ProductDisbursement, IndividualConsent | Async |
+| 19 | `duplicate-visit-prevention.js` | Warn if visit to same account already exists today | ProviderVisit | Async |
+| 20 | `visit-duration-validation.js` | Flag unreasonable visit durations (too short/long) | ProviderVisit | Sync |
+| 21 | `off-label-product-prevention.js` | Block detailing products not approved for HCP specialty | ProviderVisitProdDetailing, Account, Product2 | Async |
+| 22 | `formulary-status-warning.js` | Block sampling non-formulary products at HCOs | ProductDisbursement, ProductItem, Account, FormularyProduct | Async |
 
 ### Workflow Validation
 
@@ -154,6 +183,10 @@ force-app/main/default/lwc/
 ├── inquiryEscalationChecklist/   # Checklist - inquiry escalation steps
 ├── simpleValidationExample/      # Starter template - validation
 └── simpleChecklistExample/       # Starter template - checklist
+
+examples/visit-action-validations/
+├── 01-at-least-one-sample.js     # through
+└── 22-formulary-status-warning.js  # 22 pharma-domain validation functions
 ```
 
 ## Quick Start
