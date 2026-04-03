@@ -23,6 +23,10 @@
         return contextData[webField] || contextData[baseFieldName];
     }
 
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
+
     function atLeastOneSampleIsRequired(contextData) {
         try {
             var sampleData = getFieldData(contextData, 'ProductDisbursement');
@@ -85,9 +89,10 @@
             console.log('[visitSampleScript] results count=' + results.length);
 
             if (hasWebField) {
-                return await Promise.all(results);
+                var resolved = await Promise.all(results);
+                return unwrapProxy(resolved);
             }
-            return results;
+            return unwrapProxy(results);
         } catch (error) {
             console.log('[visitSampleScript] error: ' + error.message);
             return [{

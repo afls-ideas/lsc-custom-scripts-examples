@@ -1,14 +1,16 @@
 /**
- * 03. Brand Exclusion — Competing Brands Cannot Be Detailed Together
+ * 03. Brand Exclusion - Competing Brands Cannot Be Detailed Together
  *
  * Prevents detailing products from competing brand families on the
- * same visit. Queries Product2 for the Brand field and checks against
- * a configurable exclusion list.
+ * same visit. Reads product names from the AdditionalInformation JSON
+ * on each ProviderVisitProdDetailing record.
  *
- * Related objects: ProviderVisitProdDetailing, ProductItem, Product2
- * Pattern: db.query chain (async)
+ * Related objects: ProviderVisitProdDetailing
+ * Pattern: parseContextData + AdditionalInformation parsing (synchronous)
  */
 (() => {
+    console.log('[visitVal03] Script loaded');
+
     function parseContextData(record) {
         try {
             if (!record || typeof record.getContextData !== 'function') return {};
@@ -23,12 +25,14 @@
         return contextData[baseFieldName + '.VisitId'] || contextData[baseFieldName];
     }
 
-    async function brandExclusionCheck(contextData) {
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
+    }
+
+    function brandExclusionCheck(contextData) {
         try {
-            // Define mutually exclusive brand pairs
             var EXCLUDED_PAIRS = [
-                ['BrandA', 'BrandB'],
-                ['BrandC', 'BrandD']
+                ['Immunexis', 'Cordim']
             ];
 
             var detailData = getFieldData(contextData, 'ProviderVisitProdDetailing');
@@ -36,41 +40,31 @@
                 return { title: 'Brand exclusion check passed', status: 'success' };
             }
 
-            var productItemIds = [];
+            // Extract product name from AdditionalInformation JSON
+            var productNames = [];
             for (var i = 0; i < detailData.length; i++) {
-                var piId = detailData[i].ProductItemId || detailData[i].productitemid;
-                if (piId && productItemIds.indexOf(piId) === -1) productItemIds.push(piId);
+                var name = '';
+                try {
+                    var addlInfo = detailData[i].AdditionalInformation;
+                    if (typeof addlInfo === 'string') {
+                        var parsed = JSON.parse(addlInfo);
+                        name = parsed.LifeScienceMarketableProduct && parsed.LifeScienceMarketableProduct.Name || '';
+                    }
+                } catch (e) { }
+                if (name && productNames.indexOf(name) === -1) {
+                    productNames.push(name);
+                }
             }
-            if (productItemIds.length < 2) {
-                return { title: 'Brand exclusion check passed', status: 'success' };
-            }
-
-            var productItems = await db.query(
-                'ProductItem',
-                await new ConditionBuilder('ProductItem', new SetCondition('Id', 'IN', productItemIds)).build(),
-                ['Id', 'Product2Id']
-            );
-
-            var productIds = [];
-            for (var j = 0; j < (productItems || []).length; j++) {
-                var pid = productItems[j].stringValue('Product2Id');
-                if (pid && productIds.indexOf(pid) === -1) productIds.push(pid);
-            }
-
-            var products = await db.query(
-                'Product2',
-                await new ConditionBuilder('Product2', new SetCondition('Id', 'IN', productIds)).build(),
-                ['Id', 'Name', 'Brand__c']
-            );
-
-            var brands = [];
-            for (var k = 0; k < (products || []).length; k++) {
-                var brand = products[k].stringValue('Brand__c');
-                if (brand && brands.indexOf(brand) === -1) brands.push(brand);
-            }
+            console.log('[visitVal03] productNames=' + JSON.stringify(productNames));
 
             for (var p = 0; p < EXCLUDED_PAIRS.length; p++) {
-                if (brands.indexOf(EXCLUDED_PAIRS[p][0]) !== -1 && brands.indexOf(EXCLUDED_PAIRS[p][1]) !== -1) {
+                var foundA = false;
+                var foundB = false;
+                for (var n = 0; n < productNames.length; n++) {
+                    if (productNames[n].indexOf(EXCLUDED_PAIRS[p][0]) !== -1) foundA = true;
+                    if (productNames[n].indexOf(EXCLUDED_PAIRS[p][1]) !== -1) foundB = true;
+                }
+                if (foundA && foundB) {
                     return {
                         title: EXCLUDED_PAIRS[p][0] + ' and ' + EXCLUDED_PAIRS[p][1] + ' cannot be detailed on the same visit.',
                         status: 'error'
@@ -79,20 +73,30 @@
             }
             return { title: 'Brand exclusion check passed', status: 'success' };
         } catch (e) {
-            return { title: 'Brand exclusion check error: ' + e.message, status: 'error' };
+            return { title: 'Brand exclusion error: ' + e.message, status: 'error' };
         }
     }
 
     async function validateVisit() {
         try {
+            console.log('[visitVal03] validateVisit called');
             var contextData = parseContextData(record);
             var hasWebField = contextData['ProviderVisit'] !== undefined;
-            var result = await brandExclusionCheck(contextData);
-            var results = [result];
-            if (hasWebField) return await Promise.all(results);
-            return results;
+
+            var results = [
+                brandExclusionCheck(contextData)
+            ];
+
+            console.log('[visitVal03] results count=' + results.length);
+
+            if (hasWebField) {
+                var resolved = await Promise.all(results);
+                return unwrapProxy(resolved);
+            }
+            return unwrapProxy(results);
         } catch (error) {
-            return [{ title: 'Validation error: ' + error.message, status: 'error' }];
+            console.log('[visitVal03] error: ' + error.message);
+            return [{ title: 'Brand exclusion error: ' + error.message, status: 'error' }];
         }
     }
 

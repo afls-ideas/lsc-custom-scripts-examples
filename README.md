@@ -46,41 +46,41 @@ This is the pattern confirmed working on desktop/web. The key requirements:
 2. `validateVisit()` returns an **array** of `{title, status}` objects
 3. Platform detection via `parseContextData(record)` — check for `ProviderVisit` key
 4. Web uses `Promise.all()` wrapping; mobile does not
-5. Guard with `if (record && user && env && db)` before executing
+5. **`unwrapProxy()`** — strip Locker Service Proxy wrappers with `JSON.parse(JSON.stringify(results))` before returning
+6. Guard with `if (record && user && env && db)` before executing
 
 ```javascript
 (() => {
     function parseContextData(record) {
         try {
-            if (!record || typeof record.getContextData !== 'function') {
-                return {};
-            }
+            if (!record || typeof record.getContextData !== 'function') return {};
             var contextData = record.getContextData();
-            if (typeof contextData === 'string') {
-                return JSON.parse(contextData);
-            } else if (typeof contextData === 'object' && contextData !== null) {
-                return contextData;
-            }
+            if (typeof contextData === 'string') return JSON.parse(contextData);
+            if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
-        } catch (error) {
-            return {};
-        }
+        } catch (e) { return {}; }
+    }
+
+    function unwrapProxy(results) {
+        return JSON.parse(JSON.stringify(results));
     }
 
     async function validateVisit() {
         try {
+            var contextData = parseContextData(record);
+            var hasWebField = contextData['ProviderVisit'] !== undefined;
+
             // Your validation logic here
             var results = [
                 { title: "Validation passed", status: "success" },
                 { title: "Missing required data", status: "error" }
             ];
 
-            var contextData = parseContextData(record);
-            var hasWebField = contextData['ProviderVisit'] !== undefined;
             if (hasWebField) {
-                return await Promise.all(results);
+                var resolved = await Promise.all(results);
+                return unwrapProxy(resolved);
             }
-            return results;
+            return unwrapProxy(results);
         } catch (error) {
             return [{ title: 'Error: ' + error.message, status: 'error' }];
         }
@@ -97,6 +97,8 @@ This is the pattern confirmed working on desktop/web. The key requirements:
     }
 })();
 ```
+
+For details on the context data JSON structure returned by `record.getContextData()`, see [CONTEXT_DATA_REFERENCE.md](CONTEXT_DATA_REFERENCE.md).
 
 ### Validation Script Pattern (for Workflow)
 
@@ -255,7 +257,7 @@ The `LifeScienceCustomScript` object defaults to Private sharing. Rep users need
 - **CodeText is the runtime source of truth.** The platform executes from the `CodeText` field, not the deployed LWC. Always click Refresh after deploying.
 - **CodeText is read-only via API.** You cannot update it programmatically — only through the Refresh button.
 - **Large scripts crash silently.** If a script is too large, Locker Service fails to evaluate it and the platform shows a generic error with no console output. Keep scripts small and focused.
-- **Proxy wrapping.** Async function results get wrapped in Locker Service Proxy objects. Use the `Promise.all(results)` pattern inside `validateVisit()` for web.
+- **Proxy wrapping.** Return values get wrapped in Locker Service Proxy objects. The platform's `translateValidationResults` cannot read Proxy-wrapped results. **You must call `unwrapProxy(results)`** (i.e., `JSON.parse(JSON.stringify(results))`) before returning from `validateVisit()`. Without this, the platform silently allows the visit through.
 - **Only one Visit Action Validation runs.** First by ID/creation date. Put all rules in one script.
 - **ObjectName and OperationEventType required.** Without these on the LifeScienceCustomScript record, Visit Action Validation scripts silently don't execute.
 
