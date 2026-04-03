@@ -22,7 +22,7 @@
             var userId;
             try { userId = user.stringValue('Id'); } catch (e) { userId = null; }
             if (!userId) {
-                return { title: 'Profile message check skipped — no user ID', status: 'success' };
+                return { title: 'Profile message check skipped - no user ID', status: 'success' };
             }
 
             // Replace with your Field Sales Representative profile ID
@@ -35,23 +35,23 @@
             );
 
             if (!userInfo || userInfo.length === 0) {
-                return { title: 'Profile message check skipped — profile not found', status: 'success' };
+                return { title: 'Profile message check skipped - profile not found', status: 'success' };
             }
 
             var profileId = userInfo[0].stringValue('ProfileIdentifier');
             if (profileId !== TARGET_PROFILE_ID) {
-                return { title: 'Profile message check skipped — not a Field Sales Rep', status: 'success' };
+                return { title: 'Profile message check skipped - not a Field Sales Rep', status: 'success' };
             }
 
             var visitChannel = '';
             if (contextData.ProviderVisit) visitChannel = contextData.ProviderVisit.Channel || '';
             if (visitChannel !== 'In-Person') {
-                return { title: 'Profile message check skipped — not In-Person', status: 'success' };
+                return { title: 'Profile message check skipped - not In-Person', status: 'success' };
             }
 
             var visitDetails = getFieldData(contextData, 'ProviderVisitProdDetailing');
             if (!visitDetails || visitDetails.length === 0) {
-                return { title: 'Profile message check passed — no details', status: 'success' };
+                return { title: 'Profile message check passed - no details', status: 'success' };
             }
 
             for (var i = 0; i < visitDetails.length; i++) {
@@ -63,7 +63,7 @@
                     };
                 }
             }
-            return { title: 'All details have messages — profile check passed', status: 'success' };
+            return { title: 'All details have messages - profile check passed', status: 'success' };
         } catch (e) {
             return { title: 'Profile message check error: ' + e.message, status: 'error' };
         }

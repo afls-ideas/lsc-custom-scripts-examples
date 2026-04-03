@@ -21,7 +21,7 @@
         try {
             var samples = getFieldData(contextData, 'ProductDisbursement');
             if (!samples || samples.length === 0) {
-                return { title: 'Consent check passed — no samples', status: 'success' };
+                return { title: 'Consent check passed - no samples', status: 'success' };
             }
 
             var accountId = '';
@@ -29,7 +29,7 @@
                 accountId = contextData.ProviderVisit.AccountId || '';
             }
             if (!accountId) {
-                return { title: 'Consent check skipped — no account', status: 'success' };
+                return { title: 'Consent check skipped - no account', status: 'success' };
             }
 
             var consents = await db.query(

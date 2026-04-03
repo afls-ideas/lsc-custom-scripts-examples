@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     function visitNotesRequired(contextData) {

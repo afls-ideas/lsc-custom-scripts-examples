@@ -21,7 +21,7 @@
         try {
             var samples = getFieldData(contextData, 'ProductDisbursement');
             if (!samples || samples.length === 0) {
-                return { title: 'Lot expiry check passed — no samples', status: 'success' };
+                return { title: 'Lot expiry check passed - no samples', status: 'success' };
             }
 
             var lotIds = [];
@@ -30,7 +30,7 @@
                 if (lotId && lotIds.indexOf(lotId) === -1) lotIds.push(lotId);
             }
             if (lotIds.length === 0) {
-                return { title: 'Lot expiry check passed — no lot IDs', status: 'success' };
+                return { title: 'Lot expiry check passed - no lot IDs', status: 'success' };
             }
 
             var lots = await db.query(

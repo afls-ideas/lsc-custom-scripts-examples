@@ -21,14 +21,21 @@ function parseContextData(record) {
 The context data object uses relationship-style keys. On **web**, child records are keyed by `ObjectName.VisitId`. On **mobile**, they use just the object name.
 
 ```javascript
+// Observed keys from a real web visit (console dump of Object.keys(contextData)):
 {
     "ProviderVisit": { ... },                              // The visit record
-    "ProviderVisitProdDetailing.VisitId": [ ... ],         // Detailed products (web)
-    "ProductDisbursement.VisitId": [ ... ],                // Samples left (web)
-    "Visit.ParentVisitId": [ ... ],                        // Attendee child visits (web)
-    "ProviderVisitDtlProductMsg.VisitId": [ ... ]          // Product messages (web)
+    "PresentationForum.ForumReferenceId": [ ... ],         // CLM presentations
+    "ProviderVisitProdDetailing.VisitId": [ ... ],         // Detailed products
+    "ProductDisbursement.VisitId": [ ... ],                // Samples left
+    "ProviderVisitRqstSample.VisitId": [ ... ],            // Sample requests
+    "ProviderVisitMarketingItem.VisitId": [ ... ],         // Marketing items
+    "Visit.ParentVisitId": [ ... ],                        // Attendee child visits
+    "version": "...",                                       // Data version
+    "sObjectType": "..."                                    // Object type
 }
 ```
+
+> **Note:** `ProviderVisitDtlProductMsg.VisitId` is NOT a top-level key. Product messages are nested inside each `ProviderVisitProdDetailing` record as `detailRecord['ProviderVisitDtlProductMsg.VisitId']`.
 
 Use this helper to handle both web and mobile keys:
 
@@ -75,8 +82,10 @@ Array of products detailed during the visit. Each record:
 | `IsGeneratedFromPresentation` | Boolean | Whether generated from CLM presentation |
 | `Priority` | Number | Detail priority |
 | `AdditionalInformation` | **String (JSON)** | Nested JSON with product metadata |
-| `ProviderVisitDtlProductMsg.VisitId` | Array | Key messages for this detail |
-| `ProviderVisitProdDiscussion.VisitId` | Array | Discussions for this detail |
+| `ProviderVisitDtlProductMsg.VisitId` | Array | Key messages **nested on this detail record** |
+| `ProviderVisitProdDiscussion.VisitId` | Array | Discussions **nested on this detail record** |
+
+> **Important:** Messages and discussions are nested on each detail record, not at the top level of contextData. Access them via `detailData[i]['ProviderVisitDtlProductMsg.VisitId']`. If no messages are selected, this key will not exist on the detail record.
 
 ### AdditionalInformation JSON
 
@@ -118,10 +127,27 @@ Array of samples left during the visit. Each record:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `ProductItemId` / `productitemid` | String | Product item (lot) ID |
-| `Quantity` / `quantity` | Number | Quantity left |
+| `ContextRecordId` | String | Context record ID |
+| `ProductItemId` | String | Product item (lot) ID |
+| `ProductionBatchId` | String | Production batch ID |
+| `QuantityDisbursed` | Number | Quantity disbursed (NOT `Quantity`) |
+| `IsDisbursed` | Boolean | Whether disbursed |
+| `DisbursementDate` | String | Disbursement date (ISO 8601) |
+| `AdditionalInformation` | **String (JSON)** | Nested JSON with product and batch metadata |
 
-Note: Field names may be PascalCase or lowercase depending on web vs mobile.
+### ProductDisbursement AdditionalInformation JSON
+
+```json
+{
+    "Product2": { "Name": "Immunexis 10mg" },
+    "ProductionBatch": {
+        "Name": "IMX-BG6678",
+        "ExpirationDate": "2030-01-30T00:00:00.000Z"
+    }
+}
+```
+
+> **Important:** The quantity field is `QuantityDisbursed`, not `Quantity`. On mobile, field names may be lowercase (`quantitydisbursed`, `productitemid`).
 
 ## ChildVisit / Visit.ParentVisitId (Attendees)
 
@@ -160,12 +186,15 @@ Without `unwrapProxy`, the platform shows `Error in translateValidationResults: 
 ### Data Available Without db.query (Sync)
 
 These objects are included in the context payload:
-- `ProviderVisit` fields
-- `ProviderVisitProdDetailing` records (with `AdditionalInformation`)
-- `ProductDisbursement` records
-- `ProviderVisitDtlProductMsg` records
-- `ProviderVisitProdDiscussion` records
-- `ChildVisit` / `Visit.ParentVisitId` records
+- `ProviderVisit` - visit header fields
+- `ProviderVisitProdDetailing.VisitId` - detailed products (with `AdditionalInformation`)
+- `ProductDisbursement.VisitId` - samples
+- `ProviderVisitRqstSample.VisitId` - sample requests
+- `ProviderVisitMarketingItem.VisitId` - marketing items
+- `PresentationForum.ForumReferenceId` - CLM presentations
+- `Visit.ParentVisitId` - attendee child visits
+- `ProviderVisitDtlProductMsg.VisitId` - nested on each detail record (not top-level)
+- `ProviderVisitProdDiscussion.VisitId` - nested on each detail record (not top-level)
 
 ### Data Requiring db.query (Async)
 

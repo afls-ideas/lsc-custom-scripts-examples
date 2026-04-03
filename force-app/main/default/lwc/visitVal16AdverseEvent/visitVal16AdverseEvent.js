@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     function adverseEventReportingFlag(contextData) {
@@ -25,7 +25,7 @@
             }
 
             if (!adverseEvent) {
-                return { title: 'Adverse event check passed — no event reported', status: 'success' };
+                return { title: 'Adverse event check passed - no event reported', status: 'success' };
             }
 
             if (!notes || notes.trim().length < 20) {
@@ -34,7 +34,7 @@
                     status: 'error'
                 };
             }
-            return { title: 'Adverse event check passed — notes provided', status: 'success' };
+            return { title: 'Adverse event check passed - notes provided', status: 'success' };
         } catch (e) {
             return { title: 'Adverse event check error: ' + e.message, status: 'error' };
         }

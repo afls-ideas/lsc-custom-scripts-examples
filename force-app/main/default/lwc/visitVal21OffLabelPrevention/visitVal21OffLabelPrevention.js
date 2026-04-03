@@ -21,7 +21,7 @@
         try {
             var detailData = getFieldData(contextData, 'ProviderVisitProdDetailing');
             if (!detailData || detailData.length === 0) {
-                return { title: 'Off-label check passed — no details', status: 'success' };
+                return { title: 'Off-label check passed - no details', status: 'success' };
             }
 
             var accountId = '';
@@ -29,7 +29,7 @@
                 accountId = contextData.ProviderVisit.AccountId || '';
             }
             if (!accountId) {
-                return { title: 'Off-label check skipped — no account', status: 'success' };
+                return { title: 'Off-label check skipped - no account', status: 'success' };
             }
 
             var accounts = await db.query(
@@ -43,7 +43,7 @@
                 hcpSpecialty = accounts[0].stringValue('Specialty__c');
             }
             if (!hcpSpecialty) {
-                return { title: 'Off-label check skipped — no specialty on account', status: 'success' };
+                return { title: 'Off-label check skipped - no specialty on account', status: 'success' };
             }
 
             var productIds = [];
@@ -70,7 +70,7 @@
                     };
                 }
             }
-            return { title: 'Off-label check passed — all products approved for specialty', status: 'success' };
+            return { title: 'Off-label check passed - all products approved for specialty', status: 'success' };
         } catch (e) {
             return { title: 'Off-label check error: ' + e.message, status: 'error' };
         }

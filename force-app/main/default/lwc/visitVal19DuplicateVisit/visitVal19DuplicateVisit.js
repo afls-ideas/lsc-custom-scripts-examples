@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     async function duplicateVisitPrevention(contextData) {
@@ -25,7 +25,7 @@
                 currentVisitId = contextData.ProviderVisit.Id || '';
             }
             if (!accountId || !visitDate) {
-                return { title: 'Duplicate check skipped — missing account or date', status: 'success' };
+                return { title: 'Duplicate check skipped - missing account or date', status: 'success' };
             }
 
             var dateOnly = visitDate.split('T')[0];
@@ -35,7 +35,7 @@
             var userId;
             try { userId = user.stringValue('Id'); } catch (e) { userId = null; }
             if (!userId) {
-                return { title: 'Duplicate check skipped — no user ID', status: 'success' };
+                return { title: 'Duplicate check skipped - no user ID', status: 'success' };
             }
 
             var existingVisits = await db.query(

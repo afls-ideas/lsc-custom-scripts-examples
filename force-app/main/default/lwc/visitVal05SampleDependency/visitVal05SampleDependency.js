@@ -25,7 +25,7 @@
 
             var samples = getFieldData(contextData, 'ProductDisbursement');
             if (!samples || samples.length === 0) {
-                return { title: 'Sample dependency check passed — no samples', status: 'success' };
+                return { title: 'Sample dependency check passed - no samples', status: 'success' };
             }
 
             var productItemIds = [];

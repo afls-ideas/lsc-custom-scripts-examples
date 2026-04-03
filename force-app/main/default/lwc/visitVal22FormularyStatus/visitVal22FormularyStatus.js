@@ -21,7 +21,7 @@
         try {
             var samples = getFieldData(contextData, 'ProductDisbursement');
             if (!samples || samples.length === 0) {
-                return { title: 'Formulary check passed — no samples', status: 'success' };
+                return { title: 'Formulary check passed - no samples', status: 'success' };
             }
 
             var accountId = '';
@@ -29,7 +29,7 @@
                 accountId = contextData.ProviderVisit.AccountId || '';
             }
             if (!accountId) {
-                return { title: 'Formulary check skipped — no account', status: 'success' };
+                return { title: 'Formulary check skipped - no account', status: 'success' };
             }
 
             var accounts = await db.query(
@@ -38,7 +38,7 @@
                 ['Id', 'IsPersonAccount']
             );
             if (accounts && accounts.length > 0 && accounts[0].boolValue('IsPersonAccount')) {
-                return { title: 'Formulary check skipped — account is an HCP', status: 'success' };
+                return { title: 'Formulary check skipped - account is an HCP', status: 'success' };
             }
 
             var productItemIds = [];
@@ -92,7 +92,7 @@
                     status: 'error'
                 };
             }
-            return { title: 'Formulary check passed — all products on formulary', status: 'success' };
+            return { title: 'Formulary check passed - all products on formulary', status: 'success' };
         } catch (e) {
             return { title: 'Formulary check error: ' + e.message, status: 'error' };
         }

@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     async function territoryAlignmentCheck(contextData) {
@@ -20,7 +20,7 @@
                 accountId = contextData.ProviderVisit.AccountId || '';
             }
             if (!accountId) {
-                return { title: 'Territory check skipped — no account', status: 'success' };
+                return { title: 'Territory check skipped - no account', status: 'success' };
             }
 
             var accountTerritories = await db.query(
@@ -32,13 +32,13 @@
             );
 
             if (!accountTerritories || accountTerritories.length === 0) {
-                return { title: 'Territory check skipped — account has no territory', status: 'success' };
+                return { title: 'Territory check skipped - account has no territory', status: 'success' };
             }
 
             var userId;
             try { userId = user.stringValue('Id'); } catch (e) { userId = null; }
             if (!userId) {
-                return { title: 'Territory check skipped — no user ID', status: 'success' };
+                return { title: 'Territory check skipped - no user ID', status: 'success' };
             }
 
             var userTerritories = await db.query(

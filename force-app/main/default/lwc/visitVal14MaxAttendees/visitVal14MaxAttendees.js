@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     function maxAttendeesLimit(contextData) {
@@ -19,7 +19,7 @@
 
             var attendeeVisits = contextData['Visit.ParentVisitId'] || contextData['ChildVisit'];
             if (!attendeeVisits || attendeeVisits.length === 0) {
-                return { title: 'Attendee limit check passed — no attendees', status: 'success' };
+                return { title: 'Attendee limit check passed - no attendees', status: 'success' };
             }
 
             if (attendeeVisits.length > MAX_ATTENDEES) {
@@ -28,7 +28,7 @@
                     status: 'error'
                 };
             }
-            return { title: 'Attendee limit check passed — ' + attendeeVisits.length + ' attendee(s)', status: 'success' };
+            return { title: 'Attendee limit check passed - ' + attendeeVisits.length + ' attendee(s)', status: 'success' };
         } catch (e) {
             return { title: 'Attendee limit check error: ' + e.message, status: 'error' };
         }

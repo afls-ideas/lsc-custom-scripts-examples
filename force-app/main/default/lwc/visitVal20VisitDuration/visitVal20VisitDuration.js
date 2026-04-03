@@ -7,10 +7,10 @@
             if (typeof contextData === 'object' && contextData !== null) return contextData;
             return {};
         } catch (e) { return {}; }
+    }
 
     function unwrapProxy(results) {
         return JSON.parse(JSON.stringify(results));
-    }
     }
 
     function visitDurationValidation(contextData) {
@@ -26,7 +26,7 @@
             }
 
             if (!startTime || !endTime) {
-                return { title: 'Duration check skipped — missing start or end time', status: 'success' };
+                return { title: 'Duration check skipped - missing start or end time', status: 'success' };
             }
 
             var startMs = new Date(startTime).getTime();
@@ -45,7 +45,7 @@
                     status: 'error'
                 };
             }
-            return { title: 'Duration check passed — ' + Math.round(durationMinutes) + ' minutes', status: 'success' };
+            return { title: 'Duration check passed - ' + Math.round(durationMinutes) + ' minutes', status: 'success' };
         } catch (e) {
             return { title: 'Duration check error: ' + e.message, status: 'error' };
         }

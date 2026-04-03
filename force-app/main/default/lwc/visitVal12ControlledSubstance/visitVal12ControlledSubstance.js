@@ -21,7 +21,7 @@
         try {
             var samples = getFieldData(contextData, 'ProductDisbursement');
             if (!samples || samples.length === 0) {
-                return { title: 'Controlled substance check passed — no samples', status: 'success' };
+                return { title: 'Controlled substance check passed - no samples', status: 'success' };
             }
 
             var productItemIds = [];
@@ -63,7 +63,7 @@
             }
 
             if (!hasControlled) {
-                return { title: 'Controlled substance check passed — no controlled products', status: 'success' };
+                return { title: 'Controlled substance check passed - no controlled products', status: 'success' };
             }
 
             var hasSignature = false;
@@ -77,7 +77,7 @@
                     status: 'error'
                 };
             }
-            return { title: 'Controlled substance check passed — signature captured', status: 'success' };
+            return { title: 'Controlled substance check passed - signature captured', status: 'success' };
         } catch (e) {
             return { title: 'Controlled substance check error: ' + e.message, status: 'error' };
         }

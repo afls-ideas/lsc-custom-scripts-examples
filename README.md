@@ -8,7 +8,9 @@ A collection of small, focused example custom scripts for Life Sciences Cloud fo
 
 ## How Custom Scripts Work
 
-Custom scripts are headless LWC components deployed to your org. The platform stores the JavaScript in the `CodeText` field of `LifeScienceCustomScript` records and executes it from there — not from the deployed LWC directly. After updating an LWC, you must click **Refresh** in Admin Console to sync the code.
+Custom scripts are headless LWC components deployed to your org. The platform stores the JavaScript in the `CodeText` field of `LifeScienceCustomScript` records and executes it from there — not from the deployed LWC directly. After updating an LWC, you must click **Refresh** in Admin Console to sync the code. This copies the script to the `CodeText` field.
+
+![Click Refresh after updating an LWC](assets/Custom_Script_Refresh.gif)
 
 ### Script Types
 
@@ -121,13 +123,6 @@ Validation scripts use a simpler pattern — no platform detection needed:
 
 ## Examples
 
-### Visit Action Validation — Deployable LWCs
-
-| Example | Description | Pattern |
-|---------|-------------|---------|
-| `visitSampleScript` | Checks for required samples and detailed products | `parseContextData` + `getFieldData` for web/mobile |
-| `visitActionValidation` | Minimal working template | Simplest possible Visit Action Validation |
-
 ### Visit Action Validation — Pharma Domain Examples
 
 22 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
@@ -143,8 +138,8 @@ As a rule of thumb: if the data you need is on the visit or its direct child rec
 |---|--------------|-------------|-------------|------------|
 | 01 | `visitVal01AtLeastOneSample` | Require at least one sample per visit | ProductDisbursement | Sync |
 | 02 | `visitVal02DetailAndSample` | Require both samples and detailed products | ProductDisbursement, ProviderVisitProdDetailing | Sync |
-| 03 | `visitVal03BrandExclusion` | Prevent detailing competing brands together | ProviderVisitProdDetailing, ProductItem, Product2 | Async |
-| 04 | `visitVal04RequiredMessagePerDetail` | Each detail must have at least one key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
+| 03 | `visitVal03BrandExclusion` | Prevent detailing competing brands together | ProviderVisitProdDetailing (AdditionalInformation) | Sync |
+| 04 | `visitVal04RequiredMessagePerDetail` | Require at least one detailed product with a key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
 | 05 | `visitVal05SampleDependency` | If product A sampled, product B must also be sampled | ProductDisbursement, ProductItem, Product2 | Async |
 | 06 | `visitVal06HcpRequiredForHco` | HCO visits require at least one HCP attendee | Account, ChildVisit | Async |
 | 07 | `visitVal07SingleHcoAttendee` | Max one HCO attendee per visit | Account, ChildVisit | Async |
@@ -284,7 +279,7 @@ These examples work with the following workflow paths (configure in Admin Consol
 
 - [Custom Scripts for Life Sciences](https://help.salesforce.com/s/articleView?id=sf.ls_custom_scripts.htm&type=5) - Salesforce Help
 - [LSStarterConfig](https://github.com/SalesforceLabs/LSStarterConfig) - Salesforce Labs starter config
-- [Life Sciences Cloud Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.health_cloud.meta/health_cloud/)
+- [Administering Life Sciences Cloud](https://help.salesforce.com/s/products/health?language=en_US)
 
 ## License
 

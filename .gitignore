@@ -52,3 +52,6 @@ $RECYCLE.BIN/
 
 # Backup files
 *.bak
+
+# Video files
+*.mov
