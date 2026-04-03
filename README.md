@@ -155,7 +155,6 @@ Validation scripts use a simpler pattern — no platform detection needed:
 | 21 | `visitVal21OffLabelPrevention` | Block detailing products not approved for HCP specialty | ProviderVisitProdDetailing, Account, Product2 | Async |
 | 22 | `visitVal22FormularyStatus` | Block sampling non-formulary products at HCOs | ProductDisbursement, ProductItem, Account, FormularyProduct | Async |
 
-Standalone validation functions (without IIFE wrapper) are also available in `examples/visit-action-validations/` for reference.
 
 ### Workflow Validation
 
@@ -188,9 +187,6 @@ force-app/main/default/lwc/
 ├── simpleValidationExample/      # Starter template - validation
 └── simpleChecklistExample/       # Starter template - checklist
 
-examples/visit-action-validations/
-├── 01-at-least-one-sample.js     # through
-└── 22-formulary-status-warning.js  # 22 standalone validation functions (no IIFE wrapper)
 ```
 
 ## Quick Start
