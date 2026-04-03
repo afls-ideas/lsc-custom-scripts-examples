@@ -7,7 +7,20 @@
             },
             "Name": "DEMO Visit Action Validation",
             "ComponentName": "visitActionValidation",
-            "Type": "VisitActionValidation"
+            "Type": "VisitActionValidation",
+            "ObjectName": "ProviderVisit",
+            "OperationEventType": "OnUpdate"
+        },
+        {
+            "attributes": {
+                "type": "LifeScienceCustomScript",
+                "referenceId": "VisitSampleScript"
+            },
+            "Name": "visitSampleScript",
+            "ComponentName": "visitSampleScript",
+            "Type": "VisitActionValidation",
+            "ObjectName": "ProviderVisit",
+            "OperationEventType": "OnUpdate"
         },
         {
             "attributes": {
