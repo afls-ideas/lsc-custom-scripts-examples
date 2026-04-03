@@ -91,7 +91,7 @@ As a rule of thumb: if the data you need is on the visit or its direct child rec
 | 02 | `visitVal02DetailAndSample` | Require both samples and detailed products | ProductDisbursement, ProviderVisitProdDetailing | Sync |
 | 03 | `visitVal03BrandExclusion` | Prevent detailing competing brands together | ProviderVisitProdDetailing (AdditionalInformation) | Sync |
 | 04 | `visitVal04RequiredMessagePerDetail` | Require at least one detailed product with a key message | ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Sync |
-| 05 | `visitVal05SampleDependency` | If product A sampled, product B must also be sampled | ProductDisbursement, ProductItem, Product2 | Async |
+| 05 | `visitVal05SampleDependency` | If product A sampled, product B must also be sampled ([demo](assets/visitVal05SampleDependency_Example.gif)) | ProductDisbursement, ProductItem, Product2 | Async |
 | 06 | `visitVal06HcpRequiredForHco` | HCO visits require at least one HCP attendee | Account, ChildVisit | Async |
 | 07 | `visitVal07SingleHcoAttendee` | Max one HCO attendee per visit | Account, ChildVisit | Async |
 | 08 | `visitVal08MaxSamplesPerProduct` | Limit sample quantity per product per visit | ProductDisbursement | Sync |

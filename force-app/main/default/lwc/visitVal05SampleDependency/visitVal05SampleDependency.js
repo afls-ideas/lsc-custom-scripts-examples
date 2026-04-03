@@ -19,13 +19,14 @@
 
     async function sampleDependencyCheck(contextData) {
         try {
-            // Configure: if TRIGGER product is sampled, REQUIRED product must also be sampled
-            var TRIGGER_PRODUCT_NAME = 'Product A Starter Pack';
-            var REQUIRED_PRODUCT_NAME = 'Product A Maintenance';
+            // Configure: these products must be sampled together
+            var PRODUCT_A = 'Immunexis 10mg';
+            var PRODUCT_B = 'Immunexis 15mg';
 
             var samples = getFieldData(contextData, 'ProductDisbursement');
+            env.log('visitVal05 - samples: ' + JSON.stringify(samples));
             if (!samples || samples.length === 0) {
-                return { title: 'Sample dependency check passed - no samples', status: 'success' };
+                return { title: 'At least one sample must be dropped before submitting.', status: 'error' };
             }
 
             var productItemIds = [];
@@ -33,18 +34,21 @@
                 var piId = samples[i].ProductItemId || samples[i].productitemid;
                 if (piId && productItemIds.indexOf(piId) === -1) productItemIds.push(piId);
             }
+            env.log('visitVal05 - productItemIds: ' + JSON.stringify(productItemIds));
 
             var productItems = await db.query(
                 'ProductItem',
                 await new ConditionBuilder('ProductItem', new SetCondition('Id', 'IN', productItemIds)).build(),
                 ['Id', 'Product2Id']
             );
+            env.log('visitVal05 - productItems count: ' + (productItems || []).length);
 
             var productIds = [];
             for (var j = 0; j < (productItems || []).length; j++) {
                 var pid = productItems[j].stringValue('Product2Id');
                 if (pid && productIds.indexOf(pid) === -1) productIds.push(pid);
             }
+            env.log('visitVal05 - productIds: ' + JSON.stringify(productIds));
 
             var products = await db.query(
                 'Product2',
@@ -56,13 +60,14 @@
             for (var k = 0; k < (products || []).length; k++) {
                 productNames.push(products[k].stringValue('Name'));
             }
+            env.log('visitVal05 - productNames: ' + JSON.stringify(productNames));
 
-            var hasTrigger = productNames.indexOf(TRIGGER_PRODUCT_NAME) !== -1;
-            var hasRequired = productNames.indexOf(REQUIRED_PRODUCT_NAME) !== -1;
+            var hasA = productNames.indexOf(PRODUCT_A) !== -1;
+            var hasB = productNames.indexOf(PRODUCT_B) !== -1;
 
-            if (hasTrigger && !hasRequired) {
+            if (hasA && !hasB) {
                 return {
-                    title: 'When sampling ' + TRIGGER_PRODUCT_NAME + ', ' + REQUIRED_PRODUCT_NAME + ' must also be sampled.',
+                    title: 'When sampling ' + PRODUCT_A + ', ' + PRODUCT_B + ' must also be sampled.',
                     status: 'error'
                 };
             }
@@ -85,7 +90,11 @@
         }
     }
 
+    env.log('visitVal05 - script loaded');
     if (record && user && env && db) {
+        env.log('visitVal05 - globals available, executing');
+        var _cd = parseContextData(record);
+        env.log('visitVal05 - contextData keys: ' + JSON.stringify(Object.keys(_cd)));
         var contextData = parseContextData(record);
         var hasWebField = contextData['ProviderVisit'] !== undefined;
         if (hasWebField) return [validateVisit()];
