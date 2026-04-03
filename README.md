@@ -22,7 +22,7 @@ flowchart TD
     style G fill:#e65100,color:#fff
 ```
 
-| Mechanism | When to use | Online | Offline |
+| Mechanism | When to use | Online in web browser | Offline on iPad App |
 |-----------|------------|--------|---------|
 | **Validation Rule** | Simple, single-object checks that can be expressed with Salesforce's standard validation rule formulas | Yes | Yes |
 | **Custom Script (Visit Action Validation)** | Complex validations spanning multiple objects (samples, details, attendees, etc.) | Yes | Yes |
