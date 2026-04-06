@@ -206,6 +206,39 @@ These objects are NOT in the context and require `await db.query(...)`:
 - `ObjectTerritory2Association` / `UserTerritory2Association`
 - `IndividualConsent` or custom consent objects
 
+### Accessing Custom Fields from db.query Results
+
+`stringValue()` does **not** work for custom fields (`__c`) on either platform. Standard fields and custom fields require different access methods:
+
+| Method | Standard Fields | Custom Fields (Web) | Custom Fields (iPad) |
+|--------|----------------|--------------------|--------------------|
+| `stringValue('Field')` | Works | Does NOT work | Does NOT work |
+| `.sObject.Field__c` | Works | **Works** | No `sObject` on mobile |
+| `noNs_stringValue('Field__c')` | Works | Not needed | **Works** |
+
+Use this helper for cross-platform custom field access:
+
+```javascript
+function getCustomField(queryResult, fieldName) {
+    if (!queryResult) return null;
+    // Web: use sObject property
+    if (queryResult.sObject && queryResult.sObject[fieldName] !== undefined) {
+        return queryResult.sObject[fieldName];
+    }
+    // iPad: use noNs_stringValue
+    if (typeof queryResult.noNs_stringValue === 'function') {
+        var val = queryResult.noNs_stringValue(fieldName);
+        if (val !== undefined) return val;
+    }
+    return null;
+}
+```
+
+**Important:**
+- Custom fields with **null values** are silently dropped from `sObject` on web — accessing them returns `undefined`, not `null`
+- On iPad, custom fields must be included in the **DB Schema** (mobile metadata cache). If a field isn't in the cache, it won't sync to the device and `noNs_stringValue` will return `undefined`. Regenerate the metadata cache and re-login after adding fields.
+- The `db.query` result object is completely different between platforms: web returns an object with `sObject`, `accessibleFields`, etc.; iPad returns an opaque object with only methods (`stringValue`, `noNs_stringValue`, `numValue`, `boolValue`, `dateValue`, `setValue`, `recordTypeName`, `save`)
+
 ### Field Name Variations
 
 Web and mobile may use different casing for the same field:

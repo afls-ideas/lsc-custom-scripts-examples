@@ -76,7 +76,7 @@ Here is `visitVal02DetailAndSample` running as a Visit Action Validation — it 
 
 While many of these examples could be achieved using simple validation rules directly on the object, they are provided here so you can combine multiple rules together into a single custom script. Since only one Visit Action Validation script runs per org, this is the recommended approach for real implementations.
 
-10 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
+11 deployable LWC components, each implementing one pharma-domain validation rule using the confirmed working IIFE pattern. Deploy any one as your org's Visit Action Validation script, or copy the validation function into a combined script.
 
 #### Sync vs Async
 
@@ -97,6 +97,7 @@ As a rule of thumb: if the data you need is on the visit or its direct child rec
 | 08 | `visitVal08MaxSamplesPerProduct` | Limit sample quantity per product per visit | ProductDisbursement | Sync |
 | 09 | `visitVal09ChannelSpecific` | In-Person visits require detailed products | ProviderVisit, ProviderVisitProdDetailing | Sync |
 | 10 | `visitVal10ProfileBasedMessage` | Field Sales Reps must deliver messages on In-Person visits | UserAdditionalInfo, ProviderVisitProdDetailing, ProviderVisitDtlProductMsg | Async |
+| 11 | `visitVal11AccountCustomField` | Validate custom fields on the Account using `getCustomField()` helper | Account | Async |
 
 
 ### Workflow Validation
@@ -122,7 +123,7 @@ force-app/main/default/lwc/
 ├── visitSampleScript/            # Visit Action Validation - sample & detail checks
 ├── visitActionValidation/        # Visit Action Validation - minimal template
 ├── visitVal01AtLeastOneSample/   # through
-├── visitVal10ProfileBasedMessage/ # 10 pharma-domain validation LWCs
+├── visitVal11AccountCustomField/  # 11 pharma-domain validation LWCs
 ├── inquiryValidationScript/      # Validation - medical inquiry workflow
 ├── complianceValidationScript/   # Validation - compliance & adverse events
 ├── visitPreparationChecklist/    # Checklist - visit preparation steps
@@ -195,6 +196,9 @@ The `LifeScienceCustomScript` object defaults to Private sharing. Rep users need
 - **Proxy wrapping.** Return values get wrapped in Locker Service Proxy objects. The platform's `translateValidationResults` cannot read Proxy-wrapped results. **You must call `unwrapProxy(results)`** (i.e., `JSON.parse(JSON.stringify(results))`) before returning from `validateVisit()`. Without this, the platform silently allows the visit through.
 - **Only one Visit Action Validation runs.** First by ID/creation date. Put all rules in one script.
 - **ObjectName and OperationEventType required.** Without these on the LifeScienceCustomScript record, Visit Action Validation scripts silently don't execute.
+- **Custom fields (`__c`) require different access methods.** `stringValue()` does not work for custom fields on either platform. On web, use `.sObject.Field__c`. On iPad, use `noNs_stringValue('Field__c')`. See [CONTEXT_DATA_REFERENCE.md](CONTEXT_DATA_REFERENCE.md) for a cross-platform helper.
+- **Null custom fields are silently dropped.** On web, `db.query` results omit custom fields with null values from the `sObject` — they return `undefined`, not `null`.
+- **iPad custom fields require DB Schema configuration.** Custom fields must be included in the mobile metadata cache (Admin Console > Mobile > Object Metadata Cache Configuration). Regenerate the cache and re-login after adding fields.
 
 ## Testing
 
